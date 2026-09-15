@@ -89,24 +89,18 @@ fun ParkSpaceTopBar(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
-                // Brand Logo & Wordmark
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                // Brand Wordmark (Logo removed from top bar)
+                Text(
+                    text = "ParkEasy",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-0.5).sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .clickable(onClick = onBrandClick)
                         .testTag("brand_logo_button")
-                ) {
-                    ParkEasyBrandBadge(size = 32.dp)
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "ParkEasy",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = (-0.5).sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+                )
 
                 // Actions on the right
                 Row(verticalAlignment = Alignment.CenterVertically) {

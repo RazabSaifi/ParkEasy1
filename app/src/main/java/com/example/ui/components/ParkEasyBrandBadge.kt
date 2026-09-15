@@ -21,7 +21,7 @@ import com.example.R
 
 /**
  * Visual ParkEasy Brand Badge matching the app launcher icon reference design:
- * Dark obsidian glassmorphic squircle with vibrant blue ribbon origami P.
+ * Dark obsidian glassmorphic squircle with clean white P emblem and emerald green leaf.
  */
 @Composable
 fun ParkEasyBrandBadge(
@@ -37,8 +37,8 @@ fun ParkEasyBrandBadge(
             .shadow(
                 elevation = 6.dp,
                 shape = RoundedCornerShape(cornerRadius),
-                ambientColor = Color(0x330066FF),
-                spotColor = Color(0x5500A3FF)
+                ambientColor = Color(0x3310B981),
+                spotColor = Color(0x4400E676)
             )
             .clip(RoundedCornerShape(cornerRadius))
             .background(
@@ -55,9 +55,9 @@ fun ParkEasyBrandBadge(
                     width = 1.dp,
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0x6600B4D8),
-                            Color(0x220077B6),
-                            Color(0x440096C7)
+                            Color(0x6610B981),
+                            Color(0x330066FF),
+                            Color(0x4400B4D8)
                         )
                     )
                 ),
