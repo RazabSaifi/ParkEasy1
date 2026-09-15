@@ -262,9 +262,9 @@ fun ExploreScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = if (isDark) CharcoalSubtle else Slate100,
-                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isDark) CharcoalBorder else Slate200),
+                            shape = RoundedCornerShape(18.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)),
                             modifier = Modifier.weight(1f)
                         ) {
                             Row(
@@ -549,20 +549,23 @@ fun ExploreScreen(
                         icon = {
                             Icon(
                                 imageVector = if (isMobileMapVisible) Icons.Default.List else Icons.Default.Map,
-                                contentDescription = null
+                                contentDescription = null,
+                                tint = Color.White
                             )
                         },
                         text = {
                             Text(
                                 text = if (isMobileMapVisible) "${strings.listView} (${spaces.size})" else strings.mapView,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Black,
+                                color = Color.White
                             )
                         },
-                        containerColor = Slate900,
+                        containerColor = PrimaryBlue,
                         contentColor = Color.White,
+                        shape = RoundedCornerShape(24.dp),
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .padding(bottom = 20.dp)
+                            .padding(bottom = 24.dp)
                             .testTag("mobile_map_toggle_fab")
                     )
                 }
