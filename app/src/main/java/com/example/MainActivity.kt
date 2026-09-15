@@ -289,6 +289,11 @@ fun ParkSpaceApp(
                             reviews = allReviews,
                             onBack = { viewModel.navigateTo(AppScreen.EXPLORE) },
                             onBookNow = { id -> viewModel.startBooking(id) },
+                            onSubmitReview = { rating, comment ->
+                                if (space != null) {
+                                    viewModel.submitReview(0L, space.id, rating, comment)
+                                }
+                            },
                             userLocation = userLocation
                         )
                     }
@@ -314,7 +319,11 @@ fun ParkSpaceApp(
                         val booking = (allBookings + userBookings).find { it.id == selectedBookingId } ?: userBookings.firstOrNull()
                         DigitalPassScreen(
                             booking = booking,
-                            onBack = { viewModel.navigateTo(AppScreen.MY_BOOKINGS) }
+                            onBack = { viewModel.navigateTo(AppScreen.MY_BOOKINGS) },
+                            onCompleteBooking = { bookingId -> viewModel.completeBookingSession(bookingId) },
+                            onSubmitReview = { bkId, spId, rating, comment ->
+                                viewModel.submitReview(bkId, spId, rating, comment)
+                            }
                         )
                     }
                     AppScreen.MY_BOOKINGS -> {
@@ -325,7 +334,8 @@ fun ParkSpaceApp(
                             onSubmitReview = { bkId, spId, rating, comment ->
                                 viewModel.submitReview(bkId, spId, rating, comment)
                             },
-                            onFindParking = { viewModel.navigateTo(AppScreen.EXPLORE) }
+                            onFindParking = { viewModel.navigateTo(AppScreen.EXPLORE) },
+                            onCompleteBooking = { bookingId -> viewModel.completeBookingSession(bookingId) }
                         )
                     }
                     AppScreen.LIST_SPACE_WIZARD -> {

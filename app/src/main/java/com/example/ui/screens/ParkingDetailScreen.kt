@@ -44,6 +44,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -68,7 +69,11 @@ import com.example.data.model.Review
 import com.example.data.util.LocationUtils
 import com.example.data.util.UserLocation
 import com.example.ui.components.ParkingMapPinBadge
+import com.example.ui.components.RatingReviewDialog
+import com.example.ui.components.StarGold
+import com.example.ui.components.StarRatingDisplay
 import com.example.ui.theme.AccentEmerald
+import com.example.ui.theme.PrimaryBlue
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -96,6 +101,7 @@ fun ParkingDetailScreen(
     onBack: () -> Unit,
     onBookNow: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    onSubmitReview: ((rating: Float, comment: String) -> Unit)? = null,
     userLocation: UserLocation? = null
 ) {
     if (space == null) {
@@ -106,6 +112,7 @@ fun ParkingDetailScreen(
     }
 
     var isFavorite by remember { mutableStateOf(false) }
+    var showRatingDialog by remember { mutableStateOf(false) }
     val isDark = MaterialTheme.colorScheme.background == CharcoalBackground
 
     Box(
@@ -630,6 +637,218 @@ fun ParkingDetailScreen(
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), thickness = 1.dp)
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Section 4: Ratings & Reviews
+                val spaceReviews = remember(reviews, space.id) {
+                    reviews.filter { it.parkingSpaceId == space.id }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Driver Ratings & Reviews",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "${space.reviewsCount} verified community ratings",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    if (onSubmitReview != null) {
+                        OutlinedButton(
+                            onClick = { showRatingDialog = true },
+                            shape = RoundedCornerShape(10.dp),
+                            border = BorderStroke(1.dp, StarGold.copy(alpha = 0.8f)),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = StarGold),
+                            modifier = Modifier.testTag("write_review_button")
+                        ) {
+                            Icon(
+                                Icons.Default.Star,
+                                contentDescription = null,
+                                tint = StarGold,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Rate Spot", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // Aggregate Score Card
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isDark) CharcoalElevated else Slate100
+                    ),
+                    border = BorderStroke(1.dp, if (isDark) CharcoalBorder else Slate200),
+                    modifier = Modifier.fillMaxWidth().testTag("rating_summary_card")
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "%.1f".format(space.rating),
+                                    fontSize = 32.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    StarRatingDisplay(rating = space.rating, starSize = 16.dp)
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "Out of 5.0 stars",
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = AccentEmerald.copy(alpha = 0.12f),
+                            border = BorderStroke(1.dp, AccentEmerald.copy(alpha = 0.3f))
+                        ) {
+                            Text(
+                                text = "100% Verified",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = AccentEmerald,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // List of reviews
+                if (spaceReviews.isEmpty()) {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isDark) CharcoalElevated.copy(alpha = 0.5f) else Slate100.copy(alpha = 0.6f),
+                        border = BorderStroke(1.dp, if (isDark) CharcoalBorder else Slate200),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(18.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Default.Star,
+                                contentDescription = null,
+                                tint = StarGold.copy(alpha = 0.6f),
+                                modifier = Modifier.size(28.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "No driver comments yet",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Park at this bay and share your star rating & feedback with other drivers!",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        }
+                    }
+                } else {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxWidth().testTag("reviews_list")
+                    ) {
+                        spaceReviews.forEach { review ->
+                            Card(
+                                shape = RoundedCornerShape(14.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (isDark) CharcoalElevated else MaterialTheme.colorScheme.surface
+                                ),
+                                border = BorderStroke(1.dp, if (isDark) CharcoalBorder else Slate200),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(14.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                                    .clip(CircleShape)
+                                                    .background(if (isDark) CharcoalBorder else Slate200),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = review.userName.take(1).uppercase(),
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 13.sp,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Column {
+                                                Text(
+                                                    text = review.userName,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    fontSize = 13.sp,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Text(
+                                                    text = "Verified Session",
+                                                    fontSize = 10.sp,
+                                                    color = AccentEmerald,
+                                                    fontWeight = FontWeight.Medium
+                                                )
+                                            }
+                                        }
+
+                                        StarRatingDisplay(
+                                            rating = review.rating,
+                                            starSize = 14.dp
+                                        )
+                                    }
+
+                                    if (review.comment.isNotBlank()) {
+                                        Spacer(modifier = Modifier.height(10.dp))
+                                        Text(
+                                            text = review.comment,
+                                            fontSize = 12.sp,
+                                            lineHeight = 17.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -693,5 +912,16 @@ fun ParkingDetailScreen(
                 }
             }
         }
+    }
+
+    if (showRatingDialog && onSubmitReview != null) {
+        RatingReviewDialog(
+            parkingTitle = space.title,
+            onDismiss = { showRatingDialog = false },
+            onSubmitReview = { rating, comment ->
+                onSubmitReview(rating, comment)
+                showRatingDialog = false
+            }
+        )
     }
 }

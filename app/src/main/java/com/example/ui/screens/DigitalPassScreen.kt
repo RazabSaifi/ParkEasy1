@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.LocalParking
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -59,6 +60,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.Booking
 import com.example.data.util.LocationUtils
+import com.example.ui.components.RatingReviewDialog
+import com.example.ui.components.StarGold
 import com.example.ui.theme.AccentEmerald
 import com.example.ui.theme.CharcoalBackground
 import com.example.ui.theme.CharcoalBorder
@@ -77,6 +80,8 @@ import com.example.ui.theme.Slate900
 fun DigitalPassScreen(
     booking: Booking?,
     onBack: () -> Unit,
+    onCompleteBooking: (Long) -> Unit = {},
+    onSubmitReview: (bookingId: Long, spaceId: Long, rating: Float, comment: String) -> Unit = { _, _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -89,7 +94,8 @@ fun DigitalPassScreen(
         return
     }
 
-    var isPassScanned by remember { mutableStateOf(false) }
+    var isPassScanned by remember { mutableStateOf(booking.status == "Completed") }
+    var showRatingDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -354,6 +360,103 @@ fun DigitalPassScreen(
                     Text(if (isPassScanned) "Checked In ✓" else "Gate Check-In", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Session Completion & Star Rating Section
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isDark) CharcoalElevated else Slate100
+                ),
+                border = BorderStroke(1.dp, if (isDark) CharcoalBorder else Slate200),
+                modifier = Modifier.fillMaxWidth().testTag("session_completion_card")
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (booking.status == "Completed" && booking.isReviewed) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = AccentEmerald,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                "Parking Session Completed & Reviewed ⭐",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                color = AccentEmerald
+                            )
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = if (booking.status == "Completed") "Rate Your Experience" else "Finished Parking?",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = if (booking.status == "Completed") "Leave a star rating & feedback" else "End session & rate spot",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Button(
+                                onClick = {
+                                    if (booking.status != "Completed") {
+                                        onCompleteBooking(booking.id)
+                                    }
+                                    showRatingDialog = true
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (booking.status == "Completed") StarGold else PrimaryBlue
+                                ),
+                                modifier = Modifier.testTag("rate_session_button")
+                            ) {
+                                Icon(
+                                    Icons.Default.Star,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = if (booking.status == "Completed") "Rate Spot" else "End & Rate",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    if (showRatingDialog) {
+        RatingReviewDialog(
+            parkingTitle = booking.parkingTitle,
+            onDismiss = { showRatingDialog = false },
+            onSubmitReview = { rating, comment ->
+                onSubmitReview(booking.id, booking.parkingSpaceId, rating, comment)
+                showRatingDialog = false
+            }
+        )
     }
 }

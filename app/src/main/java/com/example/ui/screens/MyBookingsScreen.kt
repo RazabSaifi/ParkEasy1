@@ -61,6 +61,8 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.data.model.Booking
+import com.example.ui.components.RatingReviewDialog
+import com.example.ui.components.StarGold
 import com.example.ui.theme.AccentEmerald
 import com.example.ui.theme.CharcoalBackground
 import com.example.ui.theme.CharcoalBorder
@@ -83,6 +85,7 @@ fun MyBookingsScreen(
     onCancelBooking: (Long) -> Unit,
     onSubmitReview: (bookingId: Long, spaceId: Long, rating: Float, comment: String) -> Unit,
     onFindParking: () -> Unit,
+    onCompleteBooking: (Long) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
@@ -90,8 +93,6 @@ fun MyBookingsScreen(
 
     var bookingToCancel by remember { mutableStateOf<Booking?>(null) }
     var reviewBookingTarget by remember { mutableStateOf<Booking?>(null) }
-    var reviewRating by remember { mutableStateOf(5f) }
-    var reviewComment by remember { mutableStateOf("") }
 
     val isDark = MaterialTheme.colorScheme.background == CharcoalBackground
 
@@ -297,7 +298,11 @@ fun MyBookingsScreen(
                         booking = booking,
                         onViewPass = { onViewPass(booking.id) },
                         onCancel = { bookingToCancel = booking },
-                        onReview = { reviewBookingTarget = booking }
+                        onReview = { reviewBookingTarget = booking },
+                        onEndSession = {
+                            onCompleteBooking(booking.id)
+                            reviewBookingTarget = booking
+                        }
                     )
                 }
                 item {
@@ -353,87 +358,12 @@ fun MyBookingsScreen(
     // Rate & Review Dialog
     if (reviewBookingTarget != null) {
         val target = reviewBookingTarget!!
-        AlertDialog(
-            onDismissRequest = { reviewBookingTarget = null },
-            shape = RoundedCornerShape(16.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
-            title = {
-                Text(
-                    text = "Rate & Review Space",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            },
-            text = {
-                Column {
-                    Text(
-                        text = target.parkingTitle,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // Star Rating Row
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        (1..5).forEach { star ->
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "$star Stars",
-                                tint = if (star <= reviewRating) Color(0xFFF59E0B) else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .clickable { reviewRating = star.toFloat() }
-                                    .padding(4.dp)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    OutlinedTextField(
-                        value = reviewComment,
-                        onValueChange = { reviewComment = it },
-                        label = { Text("Your Feedback (Optional)") },
-                        placeholder = { Text("Safe parking, clean space, friendly host...") },
-                        maxLines = 3,
-                        shape = RoundedCornerShape(10.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedBorderColor = PrimaryBlue,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onSubmitReview(
-                            target.id,
-                            target.parkingSpaceId,
-                            reviewRating,
-                            reviewComment.ifBlank { "Great experience, verified and secure parking slot." }
-                        )
-                        reviewBookingTarget = null
-                    },
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
-                ) {
-                    Text("Submit Review", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { reviewBookingTarget = null }) {
-                    Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
-                }
+        RatingReviewDialog(
+            parkingTitle = target.parkingTitle,
+            onDismiss = { reviewBookingTarget = null },
+            onSubmitReview = { rating, comment ->
+                onSubmitReview(target.id, target.parkingSpaceId, rating, comment)
+                reviewBookingTarget = null
             }
         )
     }
@@ -444,7 +374,8 @@ private fun BookingCard(
     booking: Booking,
     onViewPass: () -> Unit,
     onCancel: () -> Unit,
-    onReview: () -> Unit
+    onReview: () -> Unit,
+    onEndSession: () -> Unit = {}
 ) {
     val isDark = MaterialTheme.colorScheme.background == CharcoalBackground
     // Dynamic photo URL based on ID
@@ -651,12 +582,40 @@ private fun BookingCard(
                     ) {
                         Text(
                             text = "Cancel",
-                            fontSize = 13.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Medium
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // End Session & Rate Button
+                    OutlinedButton(
+                        onClick = onEndSession,
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, StarGold.copy(alpha = 0.6f)),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = StarGold
+                        ),
+                        modifier = Modifier
+                            .height(38.dp)
+                            .testTag("end_and_rate_btn_${booking.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            tint = StarGold,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "End & Rate",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
 
                     // Primary Blue Action: View Pass
                     Button(
@@ -674,30 +633,35 @@ private fun BookingCard(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "View Pass",
-                            fontSize = 13.sp,
+                            text = "Pass",
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
                 } else if (booking.status == "Completed") {
                     if (!booking.isReviewed) {
-                        OutlinedButton(
+                        Button(
                             onClick = onReview,
                             shape = RoundedCornerShape(10.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
-                            modifier = Modifier.height(38.dp)
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = StarGold,
+                                contentColor = Color.White
+                            ),
+                            modifier = Modifier
+                                .height(38.dp)
+                                .testTag("rate_review_btn_${booking.id}")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Star,
                                 contentDescription = null,
-                                tint = Color(0xFFF59E0B),
+                                tint = Color.White,
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(5.dp))
                             Text(
                                 text = "Rate & Review",
                                 fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                fontWeight = FontWeight.Bold
                             )
                         }
                         Spacer(modifier = Modifier.width(8.dp))

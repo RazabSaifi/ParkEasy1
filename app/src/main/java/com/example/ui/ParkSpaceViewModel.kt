@@ -470,6 +470,14 @@ class ParkSpaceViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    fun completeBookingSession(bookingId: Long, onComplete: () -> Unit = {}) {
+        viewModelScope.launch {
+            repository.completeBooking(bookingId)
+            showMessage("Parking session marked complete! Please rate your experience ⭐")
+            onComplete()
+        }
+    }
+
     fun submitReview(bookingId: Long, spaceId: Long, rating: Float, comment: String) {
         viewModelScope.launch {
             repository.submitReview(

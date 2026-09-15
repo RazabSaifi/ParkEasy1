@@ -215,6 +215,10 @@ class ParkSpaceRepository(
         savedBooking
     }
 
+    suspend fun completeBooking(bookingId: Long) = withContext(Dispatchers.IO) {
+        bookingDao.updateBookingStatus(bookingId, "Completed")
+    }
+
     suspend fun cancelBooking(bookingId: Long, userId: Long = 1L) = withContext(Dispatchers.IO) {
         bookingDao.updateBookingStatus(bookingId, "Cancelled")
         notificationDao.insertNotification(
@@ -261,6 +265,7 @@ class ParkSpaceRepository(
         reviewDao.insertReview(review)
         if (bookingId > 0) {
             bookingDao.markReviewed(bookingId)
+            bookingDao.updateBookingStatus(bookingId, "Completed")
         }
 
         // Update space rating average
