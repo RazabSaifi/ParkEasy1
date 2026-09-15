@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">ParkEasy</string>
-    <string name="google_maps_key" translatable="false"></string>
+    <string name="google_maps_key" translatable="false">@string/google_api_key</string>
 </resources>
