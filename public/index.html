@@ -418,12 +418,29 @@
         </div>
       </div>
 
-      <!-- Right Column: Interactive Map -->
+      <!-- Right Column: Interactive Map (Google Maps API) -->
       <div class="lg:col-span-6 h-full min-h-[360px] rounded-3xl overflow-hidden border border-slate-800/80 shadow-2xl relative">
         <div id="leaflet-map" class="w-full h-full z-10"></div>
+        
+        <!-- Google Maps API Status Badge (Top-Left) -->
+        <div class="absolute top-4 left-4 z-20 flex items-center gap-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-950/85 backdrop-blur-md border border-slate-800 text-xs font-bold text-white shadow-xl">
+            <i class="fa-brands fa-google text-blue-400"></i>
+            <span id="map-engine-label">Google Maps</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          </div>
+        </div>
+
+        <!-- Floating Map Controls (Top-Right) -->
         <div class="absolute top-4 right-4 z-20 flex flex-col gap-2">
+          <!-- Recenter Button -->
           <button id="btn-recenter-map" class="w-10 h-10 rounded-2xl bg-slate-900/90 text-blue-400 border border-slate-700 flex items-center justify-center shadow-xl hover:bg-slate-800 transition" title="Center map to spots">
             <i class="fa-solid fa-crosshairs text-base"></i>
+          </button>
+          
+          <!-- Map Layer Switcher (Roadmap / Satellite / Terrain - Mirroring Android App) -->
+          <button id="btn-map-layer-toggle" class="w-10 h-10 rounded-2xl bg-slate-900/90 text-emerald-400 border border-slate-700 flex items-center justify-center shadow-xl hover:bg-slate-800 transition" title="Switch Layer: Road / Satellite / Terrain">
+            <i id="map-layer-icon" class="fa-solid fa-layer-group text-base"></i>
           </button>
         </div>
       </div>
@@ -1233,7 +1250,10 @@
     </div>
   </footer>
 
-  <!-- Leaflet Map JS -->
+  <!-- Google Maps JavaScript API (Android App Shared Key) -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOfp5nHZhRg4csd5O0pGDunTCNDq49jD0&libraries=places,geometry"></script>
+
+  <!-- Leaflet Map JS (Offline Fallback) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Application JS -->
