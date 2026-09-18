@@ -58,147 +58,98 @@ const defaultVehicles = [
 let savedVehicles = JSON.parse(localStorage.getItem("parkeasy_saved_vehicles")) || defaultVehicles;
 let userLanguage = localStorage.getItem("parkeasy_lang") || "en";
 
-// Map Engine State (Google Maps API Primary with Leaflet Fallback)
-let googleMap = null;
-let googleMarkers = [];
-let googleInfoWindow = null;
-let userGpsCircle = null;
-let userGpsMarker = null;
-let isGoogleMapsActive = false;
-let currentMapTypeIndex = 0;
-const mapTypes = ["roadmap", "hybrid", "terrain"];
+// ==========================================
+// MULTI-LAYER MAP ENGINE (Dark, Road, Satellite, Terrain)
+// ==========================================
+const MAP_LAYERS = {
+  dark: {
+    label: "Dark Mode Map",
+    icon: "fa-solid fa-moon",
+    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    options: {
+      subdomains: "abcd",
+      maxZoom: 20
+    }
+  },
+  road: {
+    label: "Roadmap View",
+    icon: "fa-solid fa-map",
+    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    options: {
+      subdomains: "abcd",
+      maxZoom: 20
+    }
+  },
+  satellite: {
+    label: "Satellite Imagery",
+    icon: "fa-solid fa-satellite",
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    options: {
+      maxZoom: 19
+    }
+  },
+  terrain: {
+    label: "Terrain View",
+    icon: "fa-solid fa-mountain",
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+    options: {
+      maxZoom: 19
+    }
+  }
+};
 
-// Leaflet Fallback State
+const LAYER_KEYS = ["dark", "road", "satellite", "terrain"];
+let currentLayerIndex = 0;
+let currentTileLayer = null;
+
+// Map & Markers Storage
 let map = null;
 let mapMarkers = [];
+let userGpsCircle = null;
+let userGpsMarker = null;
 
-// Google Maps Ultra-Premium Dark Theme (Matches Android App Palette)
-const googleMapDarkStyle = [
-  { elementType: "geometry", stylers: [{ color: "#0b132b" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#070b14" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
-  {
-    featureType: "administrative.locality",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#e2e8f0" }]
-  },
-  {
-    featureType: "poi",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#64748b" }]
-  },
-  {
-    featureType: "poi.park",
-    elementType: "geometry",
-    stylers: [{ color: "#103025" }]
-  },
-  {
-    featureType: "poi.park",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#34d399" }]
-  },
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [{ color: "#1e293b" }]
-  },
-  {
-    featureType: "road",
-    elementType: "geometry.stroke",
-    stylers: [{ color: "#0f172a" }]
-  },
-  {
-    featureType: "road",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#94a3b8" }]
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry",
-    stylers: [{ color: "#2563eb" }]
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry.stroke",
-    stylers: [{ color: "#1e3a8a" }]
-  },
-  {
-    featureType: "road.highway",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#f8fafc" }]
-  },
-  {
-    featureType: "transit",
-    elementType: "geometry",
-    stylers: [{ color: "#1e293b" }]
-  },
-  {
-    featureType: "water",
-    elementType: "geometry",
-    stylers: [{ color: "#0f263b" }]
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#38bdf8" }]
-  }
-];
-
-// ==========================================
-// MAP INITIALIZATION (Google Maps Primary with Leaflet Fallback)
-// ==========================================
 function initMap() {
   const defaultLat = 12.9716;
   const defaultLng = 77.5946;
   const mapEl = document.getElementById("leaflet-map");
-  if (!mapEl) return;
+  if (!mapEl || !window.L) return;
 
-  // Try initializing Google Maps API (shared Android key)
-  if (window.google && window.google.maps && window.google.maps.Map) {
-    try {
-      googleMap = new google.maps.Map(mapEl, {
-        center: { lat: defaultLat, lng: defaultLng },
-        zoom: 13,
-        styles: googleMapDarkStyle,
-        disableDefaultUI: false,
-        zoomControl: true,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: true,
-        backgroundColor: "#070B14"
-      });
-
-      googleInfoWindow = new google.maps.InfoWindow();
-      isGoogleMapsActive = true;
-
-      const engineBadge = document.getElementById("map-engine-label");
-      if (engineBadge) engineBadge.textContent = "Google Maps API";
-
-      console.log("Google Maps API initialized successfully with shared Android App Key.");
-      return;
-    } catch (err) {
-      console.warn("Google Maps init exception, using Leaflet fallback:", err);
-    }
+  if (map) {
+    map.remove();
+    map = null;
   }
 
-  // Leaflet Fallback
-  initLeafletFallback(mapEl, defaultLat, defaultLng);
+  map = L.map("leaflet-map", {
+    zoomControl: true,
+    attributionControl: false
+  }).setView([defaultLat, defaultLng], 13);
+
+  // Apply default Dark Navigation layer matching the Android App
+  setMapLayer("dark");
 }
 
-function initLeafletFallback(mapEl, defaultLat, defaultLng) {
-  if (map || !window.L) return;
-  map = L.map(mapEl).setView([defaultLat, defaultLng], 13);
+function setMapLayer(layerKey) {
+  if (!map || !MAP_LAYERS[layerKey]) return;
 
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 19
-  }).addTo(map);
+  if (currentTileLayer) {
+    map.removeLayer(currentTileLayer);
+  }
 
-  const engineBadge = document.getElementById("map-engine-label");
-  if (engineBadge) engineBadge.textContent = "Interactive Map";
+  const config = MAP_LAYERS[layerKey];
+  currentTileLayer = L.tileLayer(config.url, config.options).addTo(map);
+
+  const labelEl = document.getElementById("map-engine-label");
+  if (labelEl) labelEl.textContent = config.label;
+
+  const iconEl = document.getElementById("map-layer-icon");
+  if (iconEl) iconEl.className = config.icon + " text-base";
 }
 
+function switchMapLayer() {
+  currentLayerIndex = (currentLayerIndex + 1) % LAYER_KEYS.length;
+  const nextKey = LAYER_KEYS[currentLayerIndex];
+  setMapLayer(nextKey);
+}
 // ==========================================
 // REAL-TIME FIRESTORE LISTENERS
 // ==========================================
@@ -291,15 +242,12 @@ function switchView(viewName) {
     if (viewName === "explore") {
       target.classList.add("flex");
       setTimeout(() => {
-        if (isGoogleMapsActive && googleMap && window.google && window.google.maps) {
-          google.maps.event.trigger(googleMap, "resize");
-          if (googleMarkers.length > 0) {
-            const bounds = new google.maps.LatLngBounds();
-            googleMarkers.forEach(m => bounds.extend(m.getPosition()));
-            googleMap.fitBounds(bounds);
-          }
-        } else if (map) {
+        if (map) {
           map.invalidateSize();
+          if (mapMarkers.length > 0) {
+            const group = L.featureGroup(mapMarkers);
+            map.fitBounds(group.getBounds().pad(0.15));
+          }
         }
       }, 200);
     }
@@ -587,103 +535,34 @@ function renderExploreSpots() {
 }
 
 // ==========================================
-// RENDER MAP MARKERS (Google Maps & Fallback)
+// RENDER INTERACTIVE MAP MARKERS
 // ==========================================
 function renderMapMarkers() {
-  const filtered = getFilteredSpaces();
-
-  // 1. Google Maps Engine Active
-  if (isGoogleMapsActive && googleMap && window.google && window.google.maps) {
-    // Clear old Google markers
-    googleMarkers.forEach(m => m.setMap(null));
-    googleMarkers = [];
-    if (googleInfoWindow) googleInfoWindow.close();
-
-    const bounds = new google.maps.LatLngBounds();
-
-    filtered.forEach(space => {
-      const pos = { lat: space.latitude, lng: space.longitude };
-      bounds.extend(pos);
-
-      const priceText = `₹${space.hourlyPrice}`;
-      const svgIcon = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="72" height="32" viewBox="0 0 72 32">
-          <defs>
-            <linearGradient id="pinGrad${space.id}" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#2563eb"/>
-              <stop offset="100%" stop-color="#1d4ed8"/>
-            </linearGradient>
-            <filter id="shadow${space.id}" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.5"/>
-            </filter>
-          </defs>
-          <rect x="2" y="2" width="68" height="28" rx="14" fill="url(#pinGrad${space.id})" stroke="#ffffff" stroke-width="1.5" filter="url(#shadow${space.id})"/>
-          <circle cx="13" cy="16" r="4" fill="#34d399"/>
-          <text x="42" y="20" fill="#ffffff" font-size="11" font-weight="900" font-family="system-ui, -apple-system, sans-serif" text-anchor="middle">${priceText}</text>
-        </svg>
-      `;
-
-      const marker = new google.maps.Marker({
-        position: pos,
-        map: googleMap,
-        title: space.title,
-        icon: {
-          url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svgIcon.trim()),
-          scaledSize: new google.maps.Size(72, 32),
-          anchor: new google.maps.Point(36, 16)
-        }
-      });
-
-      const mapsUrl = getSmartMapsUrl(space);
-      marker.addListener("click", () => {
-        const popupHtml = `
-          <div style="background: #0b1120; color: #f8fafc; border-radius: 14px; padding: 12px; min-width: 220px; font-family: system-ui, -apple-system, sans-serif; box-shadow: 0 10px 25px rgba(0,0,0,0.6);">
-            <div style="font-weight: 900; font-size: 13px; color: #ffffff; margin-bottom: 2px;">${space.title}</div>
-            <div style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">📍 ${space.area}, ${space.city}</div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 6px 10px; background: rgba(255,255,255,0.06); border-radius: 10px;">
-              <span style="font-weight: 900; color: #34d399; font-size: 14px;">₹${space.hourlyPrice} <span style="font-size: 10px; color: #94a3b8; font-weight: normal;">/hr</span></span>
-              <span style="font-weight: 700; color: #fbbf24; font-size: 11px;">★ ${space.rating || 4.9}</span>
-            </div>
-            <div style="display: flex; gap: 6px;">
-              <button onclick="window.openSpotDetailModal('${space.id}')" style="flex: 1; padding: 7px 10px; background: #2563eb; color: #ffffff; border: none; border-radius: 10px; font-weight: 800; font-size: 11px; cursor: pointer;">
-                View Details
-              </button>
-              <a href="${mapsUrl}" target="_blank" style="padding: 7px 10px; background: #1e293b; color: #60a5fa; text-decoration: none; border: 1px solid #334155; border-radius: 10px; font-weight: 800; font-size: 11px; display: inline-block;">
-                Directions ↗
-              </a>
-            </div>
-          </div>
-        `;
-        googleInfoWindow.setContent(popupHtml);
-        googleInfoWindow.open(googleMap, marker);
-      });
-
-      googleMarkers.push(marker);
-    });
-
-    if (filtered.length > 0) {
-      googleMap.fitBounds(bounds);
-    }
-    return;
-  }
-
-  // 2. Leaflet Engine Fallback
   if (!map || !window.L) return;
+
+  // Clear existing markers
   mapMarkers.forEach(m => map.removeLayer(m));
   mapMarkers = [];
 
+  const filtered = getFilteredSpaces();
   filtered.forEach(space => {
     const mapsUrl = getSmartMapsUrl(space);
-    const pinHtml = `<div class="custom-map-pin"><span>₹${space.hourlyPrice}</span></div>`;
+    const pinHtml = `
+      <div class="custom-map-pin" title="${space.title}">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1"></span>
+        <span>₹${space.hourlyPrice}</span>
+      </div>
+    `;
+
     const icon = L.divIcon({
       html: pinHtml,
       className: '',
-      iconSize: [56, 24],
-      iconAnchor: [28, 12]
+      iconSize: [64, 28],
+      iconAnchor: [32, 14]
     });
 
     const marker = L.marker([space.latitude, space.longitude], { icon: icon }).addTo(map);
-    
+
     const popupContent = `
       <div class="p-3 text-xs space-y-2">
         <div class="font-extrabold text-white text-sm line-clamp-1">${space.title}</div>
@@ -694,12 +573,18 @@ function renderMapMarkers() {
           <span class="text-emerald-400 font-black text-sm">₹${space.hourlyPrice} <span class="text-[10px] text-slate-400 font-normal">/hr</span></span>
           <span class="text-amber-400 font-bold"><i class="fa-solid fa-star text-amber-400 text-xs mr-0.5"></i>${space.rating || 4.9}</span>
         </div>
-        <a href="${mapsUrl}" target="_blank" class="block w-full py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl text-center shadow-md transition">
-          <i class="fa-solid fa-location-arrow mr-1.5"></i>Navigate Google Maps
-        </a>
+        <div class="flex items-center gap-1.5 pt-1">
+          <button onclick="window.openSpotDetailModal('${space.id}')" class="flex-1 py-1.5 px-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl text-center shadow-md transition">
+            View Details
+          </button>
+          <a href="${mapsUrl}" target="_blank" class="py-1.5 px-2.5 bg-slate-800 hover:bg-slate-700 text-blue-400 font-bold text-xs rounded-xl border border-slate-700 text-center transition" title="Open Turnkey Navigation in Google Maps">
+            <i class="fa-solid fa-location-arrow"></i>
+          </a>
+        </div>
       </div>
     `;
-    marker.bindPopup(popupContent);
+
+    marker.bindPopup(popupContent, { maxWidth: 260 });
     mapMarkers.push(marker);
   });
 
@@ -712,20 +597,19 @@ function renderMapMarkers() {
 // Global helper to smoothly focus spot on map
 window.focusSpotOnMap = function(spotId) {
   const spot = allSpaces.find(s => String(s.id) === String(spotId));
-  if (!spot) return;
+  if (!spot || !map) return;
 
-  if (isGoogleMapsActive && googleMap) {
-    googleMap.panTo({ lat: spot.latitude, lng: spot.longitude });
-    googleMap.setZoom(15);
-    const marker = googleMarkers.find(m => m.getTitle() === spot.title);
-    if (marker && googleInfoWindow) {
-      google.maps.event.trigger(marker, 'click');
-    }
-  } else if (map) {
-    map.setView([spot.latitude, spot.longitude], 15);
+  map.setView([spot.latitude, spot.longitude], 15, { animate: true });
+
+  const targetMarker = mapMarkers.find(m => {
+    const latLng = m.getLatLng();
+    return Math.abs(latLng.lat - spot.latitude) < 0.0001 && Math.abs(latLng.lng - spot.longitude) < 0.0001;
+  });
+
+  if (targetMarker) {
+    targetMarker.openPopup();
   }
 };
-
 // ==========================================
 // SPOT DETAIL MODAL LOGIC
 // ==========================================
@@ -1433,9 +1317,8 @@ function setupEventListeners() {
         "All Cities": { lat: 20.5937, lng: 78.9629 }
       };
 
-      if (isGoogleMapsActive && googleMap && cityCoords[selectedCityFilter]) {
-        googleMap.panTo(cityCoords[selectedCityFilter]);
-        googleMap.setZoom(selectedCityFilter === "All Cities" ? 5 : 13);
+      if (map && cityCoords[selectedCityFilter]) {
+        map.setView([cityCoords[selectedCityFilter].lat, cityCoords[selectedCityFilter].lng], selectedCityFilter === "All Cities" ? 5 : 13, { animate: true });
       }
 
       renderHomeFeatured();
@@ -1465,40 +1348,27 @@ function setupEventListeners() {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         switchView("explore");
-        if (isGoogleMapsActive && googleMap && window.google && window.google.maps) {
-          googleMap.panTo({ lat, lng });
-          googleMap.setZoom(14);
+        if (map) {
+          map.setView([lat, lng], 14, { animate: true });
 
-          if (userGpsMarker) userGpsMarker.setMap(null);
-          if (userGpsCircle) userGpsCircle.setMap(null);
+          if (userGpsCircle) map.removeLayer(userGpsCircle);
+          if (userGpsMarker) map.removeLayer(userGpsMarker);
 
-          userGpsCircle = new google.maps.Circle({
-            strokeColor: "#2563eb",
-            strokeOpacity: 0.8,
-            strokeWeight: 2,
-            fillColor: "#2563eb",
+          userGpsCircle = L.circle([lat, lng], {
+            radius: 1000,
+            color: '#2563eb',
+            fillColor: '#2563eb',
             fillOpacity: 0.18,
-            map: googleMap,
-            center: { lat, lng },
-            radius: 1000
-          });
+            weight: 2
+          }).addTo(map);
 
-          userGpsMarker = new google.maps.Marker({
-            position: { lat, lng },
-            map: googleMap,
-            title: "Your Location",
-            icon: {
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: "#2563eb",
-              fillOpacity: 1,
-              strokeColor: "#ffffff",
-              strokeWeight: 3
-            }
-          });
-        } else if (map) {
-          map.setView([lat, lng], 14);
-          L.circle([lat, lng], { radius: 1000, color: '#059669', fillColor: '#059669', fillOpacity: 0.15 }).addTo(map);
+          userGpsMarker = L.circleMarker([lat, lng], {
+            radius: 8,
+            color: '#ffffff',
+            fillColor: '#2563eb',
+            fillOpacity: 1,
+            weight: 3
+          }).addTo(map);
         }
         if (btnNearMe) btnNearMe.innerHTML = `<i class="fa-solid fa-location-crosshairs text-emerald-400"></i><span>GPS Pin</span>`;
         alert(`GPS Position Locked: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
@@ -1511,31 +1381,17 @@ function setupEventListeners() {
   btnNearMe?.addEventListener("click", handleGps);
   btnHeroGps?.addEventListener("click", handleGps);
 
-  // Recenter Map Handler (Google Maps & Leaflet)
+  // Recenter Map Handler
   document.getElementById("btn-recenter-map")?.addEventListener("click", () => {
-    if (isGoogleMapsActive && googleMap && googleMarkers.length > 0) {
-      const bounds = new google.maps.LatLngBounds();
-      googleMarkers.forEach(m => bounds.extend(m.getPosition()));
-      googleMap.fitBounds(bounds);
-    } else if (map && mapMarkers.length > 0) {
+    if (map && mapMarkers.length > 0) {
       const group = L.featureGroup(mapMarkers);
       map.fitBounds(group.getBounds().pad(0.15));
     }
   });
 
-  // Map Layer Switcher (Mirroring Android App ParkingMapMode)
+  // Map Layer Switcher (Dark Mode / Road / Satellite / Terrain)
   document.getElementById("btn-map-layer-toggle")?.addEventListener("click", () => {
-    if (!isGoogleMapsActive || !googleMap) return;
-    currentMapTypeIndex = (currentMapTypeIndex + 1) % mapTypes.length;
-    const type = mapTypes[currentMapTypeIndex];
-    googleMap.setMapTypeId(type);
-
-    const iconEl = document.getElementById("map-layer-icon");
-    if (iconEl) {
-      if (type === "hybrid") iconEl.className = "fa-solid fa-satellite text-base";
-      else if (type === "terrain") iconEl.className = "fa-solid fa-mountain text-base";
-      else iconEl.className = "fa-solid fa-layer-group text-base";
-    }
+    switchMapLayer();
   });
 
   // Filter Sheet Modal Logic
