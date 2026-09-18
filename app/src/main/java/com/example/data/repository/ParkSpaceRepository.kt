@@ -1,4 +1,4 @@
-﻿package com.example.data.repository
+package com.example.data.repository
 
 import android.content.Context
 import com.example.data.local.AppDatabase
@@ -48,7 +48,7 @@ class ParkSpaceRepository(
         }
         // Start real-time cloud sync with Firebase Cloud Firestore
         firebaseSyncManager.startRealtimeSync()
-        // Ensure any local spaces are synced to cloud if missing
+        // Sync any local spaces to cloud
         firebaseSyncManager.syncAllLocalSpacesToCloud()
     }
 
@@ -92,7 +92,7 @@ class ParkSpaceRepository(
                 NotificationItem(
                     userId = userId,
                     title = "Withdrawal Initiated 💸",
-                    message = "Payout of â‚¹${amount.toInt()} has been transferred to your linked UPI ID. Ref: WT-${System.currentTimeMillis() % 100000}",
+                    message = "Payout of ₹" + amount.toInt() + " has been transferred to your linked UPI ID. Ref: WT-" + (System.currentTimeMillis() % 100000),
                     type = "Earnings"
                 )
             )
@@ -115,7 +115,7 @@ class ParkSpaceRepository(
             NotificationItem(
                 userId = space.ownerId,
                 title = "Listing Published 🚗",
-                message = "'${space.title}' has been submitted and is live on the cloud.",
+                message = "'" + space.title + "' has been submitted and is live on cloud.",
                 type = "Listing"
             )
         )
@@ -167,8 +167,8 @@ class ParkSpaceRepository(
         paymentMethod: String
     ): Booking = withContext(Dispatchers.IO) {
         val randomSuffix = (10000..99999).random()
-        val bookingCode = "PS-$randomSuffix"
-        val qrData = "PARKSPACE:BK-$bookingCode:SLOT-${space.id}:$bookingDate:$startTime"
+        val bookingCode = "PS-" + randomSuffix
+        val qrData = "PARKSPACE:BK-" + bookingCode + ":SLOT-" + space.id + ":" + bookingDate + ":" + startTime
         val providerEarnings = totalAmount - platformFee
 
         val booking = Booking(
@@ -206,7 +206,7 @@ class ParkSpaceRepository(
             NotificationItem(
                 userId = userId,
                 title = "Booking Confirmed 🎉",
-                message = "Slot at '${space.title}' confirmed for $bookingDate ($startTime - $endTime). Pass: $bookingCode.",
+                message = "Slot at '" + space.title + "' confirmed for " + bookingDate + " (" + startTime + " - " + endTime + "). Pass: " + bookingCode + ".",
                 type = "Booking"
             )
         )
@@ -216,7 +216,7 @@ class ParkSpaceRepository(
             NotificationItem(
                 userId = space.ownerId,
                 title = "New Booking Received 🚘",
-                message = "$userName booked slot for $durationHours hrs. Earnings: â‚¹${providerEarnings.toInt()} credited to balance.",
+                message = userName + " booked slot for " + durationHours + " hrs. Earnings: ₹" + providerEarnings.toInt() + " credited to balance.",
                 type = "Earnings"
             )
         )
@@ -243,8 +243,8 @@ class ParkSpaceRepository(
         notificationDao.insertNotification(
             NotificationItem(
                 userId = userId,
-                title = "Booking Cancelled â„¹ï¸",
-                message = "Your booking #$bookingId has been cancelled. Refund will be credited within 24 hours.",
+                title = "Booking Cancelled ℹ️",
+                message = "Your booking #" + bookingId + " has been cancelled. Refund will be credited within 24 hours.",
                 type = "Booking"
             )
         )
@@ -262,9 +262,11 @@ class ParkSpaceRepository(
     }
 
     // --- Reviews ---
-    fun getReviewsForSpace(spaceId: Long): Flow<List<Review>> = reviewDao.getReviewsForSpace(spaceId)
+    fun getSpaceReviews(spaceId: Long): Flow<List<Review>> = reviewDao.getReviewsForSpace(spaceId)
+    fun getAllReviews(): Flow<List<Review>> = reviewDao.getAllReviews()
 
-    suspend fun addReview(
+    suspend fun submitReview(
+        bookingId: Long,
         spaceId: Long,
         userId: Long = 1L,
         userName: String,
@@ -272,69 +274,70 @@ class ParkSpaceRepository(
         comment: String
     ) = withContext(Dispatchers.IO) {
         val review = Review(
-            parkingSpaceId = spaceId,
+            bookingId = bookingId,
             userId = userId,
             userName = userName,
+            parkingSpaceId = spaceId,
             rating = rating,
             comment = comment
         )
         reviewDao.insertReview(review)
+        if (bookingId > 0) {
+            bookingDao.markReviewed(bookingId)
+            bookingDao.updateBookingStatus(bookingId, "Completed")
+            val booking = bookingDao.getBookingById(bookingId).firstOrNull()
+            if (booking != null) {
+                firebaseSyncManager.updateBookingStatusInCloud(booking.bookingCode, "Completed")
+            }
+        }
 
-        // Recalculate average rating
-        val allReviews = reviewDao.getReviewsForSpace(spaceId).firstOrNull() ?: listOf(review)
-        val newAvgRating = allReviews.map { it.rating }.average().toFloat()
-        spaceDao.updateRating(spaceId, newAvgRating, allReviews.size)
-
-        // Publish updated rating to cloud
+        // Update space rating average
         val space = spaceDao.getSpaceById(spaceId).firstOrNull()
         if (space != null) {
-            firebaseSyncManager.publishSpaceToCloud(space.copy(rating = newAvgRating, reviewsCount = allReviews.size))
+            val newCount = space.reviewsCount + 1
+            val newRating = ((space.rating * space.reviewsCount) + rating) / newCount
+            val roundedRating = Math.round(newRating * 10f) / 10f
+            val updatedSpace = space.copy(rating = roundedRating, reviewsCount = newCount)
+            spaceDao.updateSpace(updatedSpace)
+            firebaseSyncManager.publishSpaceToCloud(updatedSpace)
         }
 
         notificationDao.insertNotification(
             NotificationItem(
                 userId = userId,
-                title = "Review Submitted 🌟",
-                message = "Thank you for rating your parking experience with $rating stars!",
+                title = "Review Submitted ⭐",
+                message = "Thank you for sharing your feedback with the community!",
                 type = "Review"
             )
         )
     }
 
     // --- Notifications ---
-    fun getNotifications(userId: Long = 1L): Flow<List<NotificationItem>> = notificationDao.getNotificationsForUser(userId)
-    fun getUnreadNotificationsCount(userId: Long = 1L): Flow<Int> = notificationDao.getUnreadCount(userId)
+    fun getUserNotifications(userId: Long = 1L): Flow<List<NotificationItem>> = notificationDao.getNotificationsByUser(userId)
 
-    suspend fun markNotificationAsRead(id: Long) = withContext(Dispatchers.IO) {
+    suspend fun markNotificationRead(id: Long) = withContext(Dispatchers.IO) {
         notificationDao.markAsRead(id)
     }
 
-    suspend fun markAllNotificationsAsRead(userId: Long = 1L) = withContext(Dispatchers.IO) {
+    suspend fun markAllNotificationsRead(userId: Long = 1L) = withContext(Dispatchers.IO) {
         notificationDao.markAllAsRead(userId)
     }
 
     // --- Blocked Slots ---
-    fun getBlockedSlots(spaceId: Long): Flow<List<BlockedSlot>> = blockedSlotDao.getBlockedSlotsForSpace(spaceId)
+    fun getBlockedSlots(spaceId: Long): Flow<List<BlockedSlot>> = blockedSlotDao.getBlockedSlots(spaceId)
 
-    suspend fun blockSlot(spaceId: Long, date: String, slotNumber: Int, reason: String) = withContext(Dispatchers.IO) {
-        blockedSlotDao.insertBlockedSlot(
-            BlockedSlot(
-                parkingSpaceId = spaceId,
-                date = date,
-                slotNumber = slotNumber,
-                reason = reason
-            )
-        )
+    suspend fun addBlockedSlot(slot: BlockedSlot) = withContext(Dispatchers.IO) {
+        blockedSlotDao.insertBlockedSlot(slot)
     }
 
-    suspend fun unblockSlot(id: Long) = withContext(Dispatchers.IO) {
+    suspend fun removeBlockedSlot(id: Long) = withContext(Dispatchers.IO) {
         blockedSlotDao.deleteBlockedSlot(id)
     }
 
     // --- Platform Settings ---
-    fun getPlatformSettings(): Flow<PlatformSettings?> = settingsDao.getSettings()
+    fun getSettings(): Flow<PlatformSettings?> = settingsDao.getSettings()
 
-    suspend fun savePlatformSettings(settings: PlatformSettings) = withContext(Dispatchers.IO) {
+    suspend fun updateSettings(settings: PlatformSettings) = withContext(Dispatchers.IO) {
         settingsDao.saveSettings(settings)
     }
 }
