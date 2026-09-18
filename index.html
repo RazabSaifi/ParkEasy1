@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ParkEasy — Real-Time Smart Parking Platform</title>
+  <title>ParkEasy â€” Real-Time Smart Parking Platform</title>
 
   <!-- Favicon & Brand Icons -->
   <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
@@ -44,147 +44,383 @@
   <!-- Custom Design System Styles -->
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+<body class="bg-[#070B14] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-600 selection:text-white pb-20 md:pb-0">
 
-  <!-- Navigation Bar -->
-  <header class="glass-nav sticky top-0 z-40 px-4 lg:px-8 py-3.5 transition-all duration-200">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
+  <!-- Top Navigation Bar -->
+  <header class="glass-nav sticky top-0 z-40 px-4 lg:px-8 py-3 transition-all duration-200">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
       
       <!-- Brand Logo -->
-      <a href="#" class="flex items-center gap-3 group">
-        <img src="logo.png" alt="ParkEasy Logo" class="w-10 h-10 rounded-2xl shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition-transform border border-white/20 object-contain bg-[#0B132B] p-1">
-        <div>
-          <span class="text-xl font-black tracking-tight text-white">Park<span class="gradient-text">Easy</span></span>
-        </div>
-      </a>
+      <div class="flex items-center gap-6">
+        <a href="#" id="brand-logo-btn" class="flex items-center gap-3 group">
+          <img src="logo.png" alt="ParkEasy Logo" class="w-10 h-10 rounded-2xl shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition-transform border border-white/20 object-contain bg-[#0B132B] p-1">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xl font-black tracking-tight text-white">Park<span class="gradient-text">Easy</span></span>
+              <span class="hidden sm:inline-block px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-black border border-blue-500/30 uppercase tracking-wider">PRO</span>
+            </div>
+          </div>
+        </a>
 
-      <!-- Real-Time Sync Indicator & Action Controls -->
-      <div class="flex items-center gap-3">
+        <!-- Desktop Navigation Tabs -->
+        <nav class="hidden md:flex items-center gap-1 p-1 bg-slate-900/80 rounded-2xl border border-slate-800 text-xs font-bold">
+          <button id="nav-tab-home" class="nav-tab-btn active px-3.5 py-2 rounded-xl text-slate-300 hover:text-white transition flex items-center gap-2">
+            <i class="fa-solid fa-house text-sm"></i>
+            <span>Home</span>
+          </button>
+          <button id="nav-tab-explore" class="nav-tab-btn px-3.5 py-2 rounded-xl text-slate-300 hover:text-white transition flex items-center gap-2">
+            <i class="fa-solid fa-compass text-sm"></i>
+            <span>Explore</span>
+          </button>
+          <button id="nav-tab-bookings" class="nav-tab-btn px-3.5 py-2 rounded-xl text-slate-300 hover:text-white transition flex items-center gap-2 relative">
+            <i class="fa-solid fa-ticket text-sm"></i>
+            <span>My Passes</span>
+            <span id="nav-passes-badge" class="hidden px-1.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[10px]">0</span>
+          </button>
+          <button id="nav-tab-host" class="nav-tab-btn px-3.5 py-2 rounded-xl text-slate-300 hover:text-white transition flex items-center gap-2">
+            <i class="fa-solid fa-warehouse text-sm"></i>
+            <span>Host Hub</span>
+          </button>
+          <button id="nav-tab-profile" class="nav-tab-btn px-3.5 py-2 rounded-xl text-slate-300 hover:text-white transition flex items-center gap-2">
+            <i class="fa-solid fa-user text-sm"></i>
+            <span>Profile</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Action Controls & Status -->
+      <div class="flex items-center gap-2 sm:gap-3">
         
-        <!-- Firebase Cloud Sync Status Badge -->
-        <div class="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold shadow-sm">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-ring"></span>
-          <span>Cloud Sync Active</span>
-        </div>
+        <!-- City Quick Indicator -->
+        <button id="btn-quick-city" class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 text-slate-300 text-xs font-semibold border border-slate-800 hover:border-slate-700 transition">
+          <i class="fa-solid fa-location-dot text-blue-400 text-xs"></i>
+          <span id="quick-city-text">Bengaluru, KA</span>
+          <i class="fa-solid fa-chevron-down text-[10px] text-slate-500 ml-1"></i>
+        </button>
+
+        <!-- 24/7 Roadside Emergency Helpline Button -->
+        <button id="btn-open-emergency" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition" title="24/7 Roadside Emergency Assistance">
+          <i class="fa-solid fa-shield-halved text-rose-400"></i>
+          <span class="hidden sm:inline">24/7 Help</span>
+        </button>
+
+        <!-- Notifications Bell -->
+        <button id="btn-open-notifications" class="relative w-9 h-9 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 flex items-center justify-center border border-slate-800 transition" title="Notifications">
+          <i class="fa-solid fa-bell text-xs"></i>
+          <span id="notif-dot" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
+          <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500"></span>
+        </button>
+
+        <!-- Language Switcher Button -->
+        <button id="btn-open-language" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 text-xs font-bold border border-slate-800 transition">
+          <i class="fa-solid fa-globe text-xs text-blue-400"></i>
+          <span id="current-lang-label">EN</span>
+        </button>
 
         <!-- Android APK Download Button -->
-        <a href="https://github.com/RazabSaifi/ParkEasy-Antigravity/actions" target="_blank" class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700/80 transition">
+        <a href="https://github.com/RazabSaifi/ParkEasy1/actions" target="_blank" class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700/80 transition">
           <i class="fa-brands fa-android text-emerald-400 text-sm"></i>
           <span>App APK</span>
         </a>
 
-        <!-- List My Space Button -->
-        <button id="btn-open-list-modal" class="btn-stitch-primary flex items-center gap-2 px-4.5 py-2.5 rounded-xl text-xs font-extrabold tracking-wide">
+        <!-- List Spot Button -->
+        <button id="btn-open-list-modal" class="btn-stitch-primary flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-extrabold tracking-wide shadow-md">
           <i class="fa-solid fa-plus text-xs"></i>
-          <span>List Spot</span>
+          <span class="hidden sm:inline">List Spot</span>
+          <span class="sm:hidden">List</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Hero Header & Search Filters -->
-  <section class="relative px-4 lg:px-8 pt-8 pb-6 border-b border-slate-800/60 z-10">
-    <div class="max-w-7xl mx-auto">
-      
-      <!-- Top Title Bar -->
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-        <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold mb-2">
-            <i class="fa-solid fa-bolt"></i> Real-Time Parking Finder & Host Platform
-          </div>
-          <h1 class="text-2xl sm:text-4xl font-black tracking-tight text-white mb-1.5">
-            Reserve Parking <span class="gradient-text">Instantly Anywhere</span>
-          </h1>
-          <p class="text-sm text-slate-400 max-w-2xl">
-            Live database synchronized with ParkEasy Android App. Real-time slot availability, verified map locations & instant UPI pass generation.
-          </p>
-        </div>
-        
-        <!-- Mode Switcher Pill Tabs -->
-        <div class="flex items-center gap-1 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs font-bold shadow-inner">
-          <button id="tab-seeker" class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md transition">Find Spot</button>
-          <button id="tab-provider" class="px-4 py-2 rounded-xl text-slate-400 hover:text-white transition">Host Console</button>
-        </div>
-      </div>
-
-      <!-- Search Controls Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-        
-        <!-- Search Input -->
-        <div class="md:col-span-6 relative">
-          <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-blue-400 text-sm"></i>
-          <input type="text" id="search-input" placeholder="Search spot name, area, college (e.g. SDGI, IMS, Indiranagar)..." class="w-full pl-11 pr-10 py-3 rounded-2xl glass-input text-slate-100 text-sm placeholder:text-slate-500 font-medium">
-          <button id="btn-clear-search" class="hidden absolute right-3.5 top-3.5 text-slate-400 hover:text-white transition">
-            <i class="fa-solid fa-xmark text-sm"></i>
-          </button>
-        </div>
-
-        <!-- City Select Dropdown -->
-        <div class="md:col-span-3">
-          <select id="city-select" class="w-full px-4 py-3 rounded-2xl glass-input text-slate-100 text-sm font-semibold cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394A3B8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px_12px] bg-[right_1rem_center] bg-no-repeat pr-10">
-            <option value="All Cities">🌆 All Cities</option>
-            <option value="Bengaluru" selected>📍 Bengaluru</option>
-            <option value="New Delhi">📍 New Delhi</option>
-            <option value="Ghaziabad">📍 Ghaziabad</option>
-            <option value="Mumbai">📍 Mumbai</option>
-            <option value="Hyderabad">📍 Hyderabad</option>
-            <option value="Pune">📍 Pune</option>
-          </select>
-        </div>
-
-        <!-- GPS Near Me Button -->
-        <div class="md:col-span-3">
-          <button id="btn-near-me" class="w-full py-3 px-4 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-500/10">
-            <i class="fa-solid fa-location-crosshairs text-emerald-400"></i>
-            <span>GPS Auto-Pin</span>
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Filter Pills Row -->
-      <div class="flex items-center gap-2.5 overflow-x-auto pt-4 pb-1 no-scrollbar text-xs font-semibold">
-        <span class="text-slate-500 mr-1 font-bold uppercase tracking-wider text-[10px]">Filter:</span>
-        <button class="filter-pill active px-4 py-2 rounded-full border text-xs font-bold" data-filter="All">All Spots</button>
-        <button class="filter-pill px-4 py-2 rounded-full bg-slate-900/80 text-slate-300 border border-slate-800" data-filter="Covered">🚘 Covered Roof</button>
-        <button class="filter-pill px-4 py-2 rounded-full bg-slate-900/80 text-slate-300 border border-slate-800" data-filter="EV Charging">⚡ EV Charging</button>
-        <button class="filter-pill px-4 py-2 rounded-full bg-slate-900/80 text-slate-300 border border-slate-800" data-filter="Under ₹50">🏷️ Under ₹50/hr</button>
-        <button class="filter-pill px-4 py-2 rounded-full bg-slate-900/80 text-slate-300 border border-slate-800" data-filter="24/7">🕒 24/7 Access</button>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Main Content Area: Split View List + Map -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 z-10">
+  <!-- ======================================================== -->
+  <!-- VIEW 1: HOME DASHBOARD (Hero, Vehicles, Quick Spots, Stats) -->
+  <!-- ======================================================== -->
+  <main id="view-home" class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 z-10 space-y-8">
     
-    <!-- Seeker View -->
-    <div id="view-seeker" class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-280px)] min-h-[580px]">
+    <!-- Hero Banner Card -->
+    <div class="glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-slate-800 shadow-2xl">
+      <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-gradient-to-br from-blue-600/20 to-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div class="relative z-10 max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold mb-3">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-ring"></span>
+          <span>Cloud Sync Active â€¢ India's #1 Real-Time Smart Parking</span>
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white mb-2 leading-tight">
+          Find, Reserve & Park <span class="gradient-text">In Seconds</span>
+        </h1>
+        <p class="text-sm text-slate-400 mb-6">
+          Instant QR digital passes, verified camera security, EV supercharging, and guaranteed reserved parking slots across 14+ Indian cities.
+        </p>
+
+        <!-- Quick Search Bar in Hero -->
+        <div class="flex flex-col sm:flex-row items-center gap-2.5 p-2 rounded-2xl bg-slate-950/80 border border-slate-800/80 shadow-2xl">
+          <div class="flex-1 flex items-center gap-3 px-3 py-1.5 w-full">
+            <i class="fa-solid fa-magnifying-glass text-blue-400 text-sm"></i>
+            <input type="text" id="hero-search-input" placeholder="Search area, college, station (e.g. Indiranagar, SDGI, IMS, Metro)..." class="w-full bg-transparent text-sm text-white placeholder:text-slate-500 outline-none font-medium">
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button id="btn-hero-gps" class="flex-1 sm:flex-none px-4 py-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-location-crosshairs text-xs"></i>
+              <span>Near Me</span>
+            </button>
+            <button id="btn-hero-search-go" class="flex-1 sm:flex-none px-6 py-3 rounded-xl btn-stitch-primary text-xs font-extrabold shadow-lg flex items-center justify-center gap-2">
+              <span>Find Slots</span>
+              <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Booking Quick Pass Banner (Shown when active passes exist) -->
+    <div id="home-active-pass-banner" class="hidden glass-card rounded-3xl p-5 border border-emerald-500/40 bg-gradient-to-r from-emerald-950/30 via-slate-900/60 to-slate-900/80 relative overflow-hidden shadow-xl">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl font-black border border-emerald-500/40 shadow-lg">
+            <i class="fa-solid fa-qrcode"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-black uppercase tracking-wider text-emerald-400">Active Parking Pass</span>
+              <span id="home-pass-timer" class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[11px] font-extrabold">01h 45m remaining</span>
+            </div>
+            <h3 id="home-pass-spot-name" class="text-base font-extrabold text-white mt-0.5">Spot Name</h3>
+            <p id="home-pass-vehicle" class="text-xs text-slate-400">Vehicle: KA-01-AB-1234 â€¢ Valid Today</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2.5 w-full sm:w-auto">
+          <a id="home-pass-maps-btn" href="#" target="_blank" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700 text-xs font-bold text-center transition">
+            <i class="fa-solid fa-location-arrow mr-1.5 text-blue-400"></i> Navigate
+          </a>
+          <button id="home-pass-view-btn" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl btn-stitch-emerald text-xs font-extrabold shadow-lg">
+            View QR Pass
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vehicle Type Quick Selectors (Figma-Style Chips) -->
+    <div>
+      <div class="flex items-center justify-between mb-3.5">
+        <div>
+          <h2 class="text-lg font-black text-white tracking-tight">Select Vehicle Category</h2>
+          <p class="text-xs text-slate-400">Filter parking spaces optimized for your vehicle size</p>
+        </div>
+        <button id="btn-see-all-explore" class="text-xs font-bold text-blue-400 hover:text-blue-300 transition flex items-center gap-1">
+          <span>Explore All</span>
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div class="vehicle-chip selected glass-card p-4 rounded-2xl border border-slate-800 flex items-center gap-3" data-vehicle="All">
+          <div class="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center text-lg">ðŸš—</div>
+          <div>
+            <div class="text-xs font-extrabold text-white">All Vehicles</div>
+            <div class="text-[11px] text-slate-400">Any spot</div>
+          </div>
+        </div>
+
+        <div class="vehicle-chip glass-card p-4 rounded-2xl border border-slate-800 flex items-center gap-3" data-vehicle="Two Wheeler">
+          <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg">ðŸ›µ</div>
+          <div>
+            <div class="text-xs font-extrabold text-white">Two Wheeler</div>
+            <div class="text-[11px] text-slate-400">From â‚¹20/hr</div>
+          </div>
+        </div>
+
+        <div class="vehicle-chip glass-card p-4 rounded-2xl border border-slate-800 flex items-center gap-3" data-vehicle="Hatchback">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-lg">ðŸš™</div>
+          <div>
+            <div class="text-xs font-extrabold text-white">Hatchback</div>
+            <div class="text-[11px] text-slate-400">From â‚¹35/hr</div>
+          </div>
+        </div>
+
+        <div class="vehicle-chip glass-card p-4 rounded-2xl border border-slate-800 flex items-center gap-3" data-vehicle="Sedan">
+          <div class="w-10 h-10 rounded-xl bg-sky-600/20 text-sky-400 flex items-center justify-center text-lg">ðŸš˜</div>
+          <div>
+            <div class="text-xs font-extrabold text-white">Sedan / SUV</div>
+            <div class="text-[11px] text-slate-400">From â‚¹50/hr</div>
+          </div>
+        </div>
+
+        <div class="vehicle-chip glass-card p-4 rounded-2xl border border-slate-800 flex items-center gap-3" data-vehicle="EV">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-lg">âš¡</div>
+          <div>
+            <div class="text-xs font-extrabold text-white">EV Supercharge</div>
+            <div class="text-[11px] text-slate-400">Charging spot</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Platform Stats & Guarantee Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="glass-card p-4 rounded-2xl border border-slate-800/80 flex items-center gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center font-black">
+          <i class="fa-solid fa-square-parking"></i>
+        </div>
+        <div>
+          <div class="text-xl font-black text-white">1,250+</div>
+          <div class="text-[11px] text-slate-400 font-semibold">Verified Spaces</div>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl border border-slate-800/80 flex items-center gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center font-black">
+          <i class="fa-solid fa-city"></i>
+        </div>
+        <div>
+          <div class="text-xl font-black text-white">14 Cities</div>
+          <div class="text-[11px] text-slate-400 font-semibold">Across India</div>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl border border-slate-800/80 flex items-center gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center font-black">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <div>
+          <div class="text-xl font-black text-white">Instant QR</div>
+          <div class="text-[11px] text-slate-400 font-semibold">Fast Entry Pass</div>
+        </div>
+      </div>
+
+      <div class="glass-card p-4 rounded-2xl border border-slate-800/80 flex items-center gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center font-black">
+          <i class="fa-solid fa-shield-check"></i>
+        </div>
+        <div>
+          <div class="text-xl font-black text-white">99.4%</div>
+          <div class="text-[11px] text-slate-400 font-semibold">Safe & Monitored</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Featured Nearby Parking Spots -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-black text-white tracking-tight">Recommended Parking Spaces</h2>
+          <p class="text-xs text-slate-400">Real-time availability synced with Firebase Cloud</p>
+        </div>
+        <button id="btn-refresh-home" class="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-arrows-rotate text-xs"></i> Refresh
+        </button>
+      </div>
+
+      <div id="home-featured-spots" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Dynamically injected cards -->
+        <div class="glass-card rounded-3xl p-6 text-center skeleton-loader">
+          <p class="text-slate-400 text-sm">Loading live spaces from cloud database...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Host & Earn CTA Card -->
+    <div class="glass-card rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/40 border border-blue-500/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+      <div class="space-y-1.5 max-w-xl text-center md:text-left">
+        <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 font-extrabold text-[11px] uppercase tracking-wider">Host Community</span>
+        <h3 class="text-2xl font-black text-white">Have an Empty Driveway or Garage?</h3>
+        <p class="text-xs text-slate-400">
+          List your parking space on ParkEasy and earn <span class="text-emerald-400 font-bold">â‚¹5,000 to â‚¹25,000 every month</span>. Automated UPI payments, verified drivers, and full control over your availability schedule.
+        </p>
+      </div>
+      <button id="btn-home-list-cta" class="px-6 py-3.5 rounded-2xl btn-stitch-primary text-xs font-black shadow-xl shrink-0">
+        + Start Hosting Today ðŸš€
+      </button>
+    </div>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- VIEW 2: EXPLORE (Interactive Map + Filter Sheet + List) -->
+  <!-- ======================================================== -->
+  <div id="view-explore" class="hidden flex-1 flex-col z-10">
+    
+    <!-- Explore Search & Filter Toolbar -->
+    <section class="px-4 lg:px-8 pt-4 pb-3 border-b border-slate-800/60 glass-nav">
+      <div class="max-w-7xl mx-auto space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+          
+          <!-- Search Input -->
+          <div class="md:col-span-5 relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-3 text-blue-400 text-sm"></i>
+            <input type="text" id="search-input" placeholder="Search spot name, area, college (e.g. SDGI, IMS, Indiranagar)..." class="w-full pl-11 pr-10 py-2.5 rounded-xl glass-input text-slate-100 text-sm placeholder:text-slate-500 font-medium">
+            <button id="btn-clear-search" class="hidden absolute right-3.5 top-3 text-slate-400 hover:text-white transition">
+              <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+          </div>
+
+          <!-- City Select Dropdown -->
+          <div class="md:col-span-3">
+            <select id="city-select" class="w-full px-4 py-2.5 rounded-xl glass-input text-slate-100 text-sm font-semibold cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394A3B8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px_12px] bg-[right_1rem_center] bg-no-repeat pr-10">
+              <option value="All Cities">ðŸŒ† All Cities</option>
+              <option value="Bengaluru" selected>ðŸ“ Bengaluru</option>
+              <option value="New Delhi">ðŸ“ New Delhi</option>
+              <option value="Ghaziabad">ðŸ“ Ghaziabad</option>
+              <option value="Mumbai">ðŸ“ Mumbai</option>
+              <option value="Hyderabad">ðŸ“ Hyderabad</option>
+              <option value="Pune">ðŸ“ Pune</option>
+              <option value="Noida">ðŸ“ Noida</option>
+              <option value="Gurugram">ðŸ“ Gurugram</option>
+            </select>
+          </div>
+
+          <!-- GPS Near Me Button -->
+          <div class="md:col-span-2">
+            <button id="btn-near-me" class="w-full py-2.5 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-location-crosshairs text-emerald-400"></i>
+              <span>GPS Pin</span>
+            </button>
+          </div>
+
+          <!-- Full Filter Sheet Trigger Button (App-Style) -->
+          <div class="md:col-span-2">
+            <button id="btn-open-filter-sheet" class="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-2 transition">
+              <i class="fa-solid fa-sliders text-blue-400"></i>
+              <span>Filters</span>
+              <span id="active-filter-badge" class="hidden px-1.5 py-0.2 rounded-full bg-blue-500 text-[10px] font-black">1</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Filter Quick Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs font-semibold">
+          <button class="filter-pill active px-3.5 py-1.5 rounded-full border text-xs font-bold" data-filter="All">All Spots</button>
+          <button class="filter-pill px-3.5 py-1.5 rounded-full bg-slate-900/80 text-slate-300 border border-slate-800" data-filter="Covered">ðŸš˜ Covered Roof</button>
+          <button class="filter-pill px-3.5 py-1.5 rounded-full bg-slate-900/80 text-slate-300 border border-slate-800" data-filter="EV Charging">âš¡ EV Charging</button>
+          <button class="filter-pill px-3.5 py-1.5 rounded-full bg-slate-900/80 text-slate-300 border border-slate-800" data-filter="Under â‚¹50">ðŸ·ï¸ Under â‚¹50/hr</button>
+          <button class="filter-pill px-3.5 py-1.5 rounded-full bg-slate-900/80 text-slate-300 border border-slate-800" data-filter="24/7">ðŸ•’ 24/7 Access</button>
+          <button class="filter-pill px-3.5 py-1.5 rounded-full bg-slate-900/80 text-slate-300 border border-slate-800" data-filter="CCTV">ðŸ“¹ CCTV Guarded</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Split List + Map View -->
+    <div class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-5 grid grid-cols-1 lg:grid-cols-12 gap-5 h-[calc(100vh-210px)] min-h-[560px]">
       
       <!-- Left Column: Parking Spots List -->
       <div class="lg:col-span-6 flex flex-col h-full">
-        <div class="flex items-center justify-between mb-3 px-1">
-          <div class="flex items-center gap-2">
-            <span id="spots-count" class="text-xs font-extrabold text-slate-300">Loading live spots...</span>
-          </div>
+        <div class="flex items-center justify-between mb-2.5 px-1">
+          <span id="spots-count" class="text-xs font-extrabold text-slate-300">Loading live spots...</span>
           <button id="btn-refresh-sync" class="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-arrows-rotate text-xs"></i> Refresh Sync
+            <i class="fa-solid fa-arrows-rotate text-xs"></i> Sync
           </button>
         </div>
 
         <div id="spots-list-container" class="flex-1 overflow-y-auto space-y-3.5 pr-1.5">
-          <!-- Loading Skeleton -->
-          <div class="glass-card rounded-2xl p-6 text-center skeleton-loader">
-            <p class="text-slate-400 text-sm font-medium">Connecting to Firebase Cloud Firestore...</p>
-          </div>
+          <!-- Dynamic spot cards -->
         </div>
       </div>
 
       <!-- Right Column: Interactive Map -->
-      <div class="lg:col-span-6 h-full min-h-[380px] rounded-3xl overflow-hidden border border-slate-800/80 shadow-2xl relative">
+      <div class="lg:col-span-6 h-full min-h-[360px] rounded-3xl overflow-hidden border border-slate-800/80 shadow-2xl relative">
         <div id="leaflet-map" class="w-full h-full z-10"></div>
-
-        <!-- Map Layer Controls -->
         <div class="absolute top-4 right-4 z-20 flex flex-col gap-2">
           <button id="btn-recenter-map" class="w-10 h-10 rounded-2xl bg-slate-900/90 text-blue-400 border border-slate-700 flex items-center justify-center shadow-xl hover:bg-slate-800 transition" title="Center map to spots">
             <i class="fa-solid fa-crosshairs text-base"></i>
@@ -194,41 +430,690 @@
 
     </div>
 
-    <!-- Provider/Host Dashboard View (Initially Hidden) -->
-    <div id="view-provider" class="hidden flex-col gap-6">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="glass-card p-6 rounded-3xl border border-slate-800 relative overflow-hidden">
-          <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Available Balance</div>
-          <div class="text-3xl font-black text-white" id="host-balance">₹4,250</div>
-          <button id="btn-withdraw" class="mt-4 w-full py-2.5 rounded-xl btn-stitch-emerald text-xs font-extrabold">Withdraw to UPI</button>
-        </div>
+  </div>
 
-        <div class="glass-card p-6 rounded-3xl border border-slate-800">
-          <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">My Listed Spaces</div>
-          <div class="text-3xl font-black text-blue-400" id="host-listings-count">0 Listings</div>
-          <button id="btn-dashboard-add" class="mt-4 w-full py-2.5 rounded-xl btn-stitch-primary text-xs font-extrabold">+ Add Parking Space</button>
-        </div>
-
-        <div class="glass-card p-6 rounded-3xl border border-slate-800">
-          <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Reservations</div>
-          <div class="text-3xl font-black text-amber-400" id="host-bookings-count">14 Passes</div>
-          <div class="mt-3 text-xs text-slate-400 font-medium">100% direct instant payout verification</div>
-        </div>
+  <!-- ======================================================== -->
+  <!-- VIEW 3: MY BOOKINGS & PASSES (Active, Completed, Cancel) -->
+  <!-- ======================================================== -->
+  <main id="view-bookings" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 z-10 space-y-6">
+    
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black text-white">My Parking Passes & Bookings</h1>
+        <p class="text-xs text-slate-400 mt-1">Manage active QR passes, complete parking sessions, and submit reviews</p>
       </div>
 
-      <div class="glass-card rounded-3xl p-6 border border-slate-800">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <i class="fa-solid fa-warehouse text-blue-400"></i> My Listed Parking Slots
+      <!-- Tabs: Active, Completed, Cancelled -->
+      <div class="flex items-center gap-1 p-1 bg-slate-900/90 rounded-2xl border border-slate-800 text-xs font-bold self-start">
+        <button id="tab-bk-active" class="px-4 py-2 rounded-xl bg-blue-600 text-white shadow-md transition">Active (0)</button>
+        <button id="tab-bk-completed" class="px-4 py-2 rounded-xl text-slate-400 hover:text-white transition">Completed</button>
+        <button id="tab-bk-cancelled" class="px-4 py-2 rounded-xl text-slate-400 hover:text-white transition">Cancelled</button>
+      </div>
+    </div>
+
+    <!-- Passes Container -->
+    <div id="bookings-list-container" class="space-y-4">
+      <!-- Injected via JavaScript -->
+    </div>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- VIEW 4: HOST HUB / PROVIDER CONSOLE                      -->
+  <!-- ======================================================== -->
+  <main id="view-host" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 z-10 space-y-6">
+    
+    <!-- Host Top Overview & Earnings Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      
+      <div class="glass-card p-6 rounded-3xl border border-slate-800 relative overflow-hidden">
+        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Available Balance</div>
+        <div class="text-3xl font-black text-white" id="host-balance">â‚¹4,250</div>
+        <button id="btn-withdraw" class="mt-3.5 w-full py-2.5 rounded-xl btn-stitch-emerald text-xs font-extrabold shadow-lg">
+          Withdraw to UPI
+        </button>
+      </div>
+
+      <div class="glass-card p-6 rounded-3xl border border-slate-800">
+        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Listed Spaces</div>
+        <div class="text-3xl font-black text-blue-400" id="host-listings-count">0 Listings</div>
+        <div class="mt-3 text-xs text-slate-400 font-medium">All live in Cloud Firestore</div>
+      </div>
+
+      <div class="glass-card p-6 rounded-3xl border border-slate-800">
+        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Reservations</div>
+        <div class="text-3xl font-black text-amber-400" id="host-bookings-count">18 Passes</div>
+        <div class="mt-3 text-xs text-slate-400 font-medium">100% direct instant payout</div>
+      </div>
+
+      <div class="glass-card p-6 rounded-3xl border border-slate-800">
+        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Superhost Score</div>
+        <div class="text-3xl font-black text-emerald-400">4.9 â˜…</div>
+        <div class="mt-3 text-xs text-slate-400 font-medium">Top 5% rated host</div>
+      </div>
+
+    </div>
+
+    <!-- Manage My Spaces Section -->
+    <div class="glass-card rounded-3xl p-6 border border-slate-800 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-warehouse text-blue-400"></i> My Listed Parking Spaces
         </h3>
-        <div id="provider-listings-list" class="space-y-3">
-          <p class="text-slate-400 text-sm">Loading your host spaces...</p>
+        <button id="btn-host-add-space" class="px-4 py-2 rounded-xl btn-stitch-primary text-xs font-extrabold shadow-md">
+          + Add New Space
+        </button>
+      </div>
+      
+      <div id="provider-listings-list" class="space-y-3">
+        <p class="text-slate-400 text-sm">Loading your host spaces...</p>
+      </div>
+    </div>
+
+    <!-- Recent Guest Reservations Table -->
+    <div class="glass-card rounded-3xl p-6 border border-slate-800 space-y-4">
+      <h3 class="text-lg font-bold text-white flex items-center gap-2">
+        <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> Recent Guest Check-Ins & Passes
+      </h3>
+      <div id="host-recent-bookings" class="space-y-2.5">
+        <p class="text-slate-400 text-xs">No recent reservations yet.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- VIEW 5: PROFILE & SETTINGS (Vehicles, UPI, Language, Help) -->
+  <!-- ======================================================== -->
+  <main id="view-profile" class="hidden flex-1 max-w-4xl w-full mx-auto px-4 lg:px-8 py-6 z-10 space-y-6">
+    
+    <!-- Profile Info Card -->
+    <div class="glass-card rounded-3xl p-6 border border-slate-800 flex flex-col sm:flex-row items-center sm:items-start gap-5">
+      <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-3xl font-black shadow-xl shrink-0 border border-white/20">
+        AR
+      </div>
+      <div class="flex-1 text-center sm:text-left space-y-1">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+          <h2 class="text-2xl font-black text-white" id="profile-name">Alex Mercer</h2>
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/30 self-center sm:self-auto">
+            <i class="fa-solid fa-check-circle text-[11px]"></i> KYC Verified
+          </span>
+        </div>
+        <p class="text-xs text-slate-400" id="profile-email">alex.mercer@gmail.com â€¢ +91 98765 43210</p>
+        <p class="text-[11px] text-slate-500">Member since 2026 â€¢ Real-Time ParkEasy Pro Account</p>
+      </div>
+      <button id="btn-edit-profile" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+        Edit Profile
+      </button>
+    </div>
+
+    <!-- My Saved Vehicles Card -->
+    <div class="glass-card rounded-3xl p-6 border border-slate-800 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+            <i class="fa-solid fa-car text-blue-400"></i> My Saved Vehicles
+          </h3>
+          <p class="text-xs text-slate-400">Select instantly during spot reservation</p>
+        </div>
+        <button id="btn-open-add-vehicle" class="px-3.5 py-2 rounded-xl btn-stitch-primary text-xs font-extrabold shadow-md">
+          + Add Vehicle
+        </button>
+      </div>
+
+      <div id="saved-vehicles-list" class="space-y-2.5">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+
+    <!-- Payment & UPI Methods Card -->
+    <div class="glass-card rounded-3xl p-6 border border-slate-800 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+            <i class="fa-solid fa-credit-card text-emerald-400"></i> Saved UPI Payment Methods
+          </h3>
+          <p class="text-xs text-slate-400">Fast 1-click checkout for parking passes</p>
+        </div>
+        <button id="btn-add-upi" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+          + Add UPI
+        </button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold">UPI</div>
+            <div>
+              <div class="font-bold text-white">alex@okhdfcbank</div>
+              <div class="text-[11px] text-slate-400">Google Pay â€¢ Primary Method</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-[10px]">Default</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preferences & 24/7 Roadside Assistance Card -->
+    <div class="glass-card rounded-3xl p-6 border border-slate-800 space-y-4">
+      <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+        <i class="fa-solid fa-gear text-purple-400"></i> App Preferences & Support
+      </h3>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between cursor-pointer hover:border-slate-700 transition" id="card-pref-lang">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-globe text-blue-400 text-base"></i>
+            <div>
+              <div class="font-bold text-white">Language</div>
+              <div class="text-slate-400 text-[11px]" id="pref-lang-text">English (India)</div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between cursor-pointer hover:border-slate-700 transition" id="card-pref-emergency">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-truck-pickup text-rose-400 text-base"></i>
+            <div>
+              <div class="font-bold text-white">Roadside Help</div>
+              <div class="text-slate-400 text-[11px]">Towing, Battery, Helpline</div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
         </div>
       </div>
     </div>
 
   </main>
 
-  <!-- Modal 1: List Parking Space Wizard -->
+  <!-- ======================================================== -->
+  <!-- MOBILE FLOATING BOTTOM NAVIGATION BAR                     -->
+  <!-- ======================================================== -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-bottom-bar px-3 py-2 flex items-center justify-around">
+    <button class="bottom-nav-btn active flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-blue-400 transition" data-view="home">
+      <i class="fa-solid fa-house text-base"></i>
+      <span>Home</span>
+    </button>
+    <button class="bottom-nav-btn flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-blue-400 transition" data-view="explore">
+      <i class="fa-solid fa-compass text-base"></i>
+      <span>Explore</span>
+    </button>
+    <button class="bottom-nav-btn flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-blue-400 transition relative" data-view="bookings">
+      <i class="fa-solid fa-ticket text-base"></i>
+      <span>Passes</span>
+      <span id="mobile-passes-badge" class="hidden absolute -top-1 right-2 px-1.5 py-0.2 rounded-full bg-emerald-500 text-slate-950 font-black text-[9px]">0</span>
+    </button>
+    <button class="bottom-nav-btn flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-blue-400 transition" data-view="host">
+      <i class="fa-solid fa-warehouse text-base"></i>
+      <span>Host</span>
+    </button>
+    <button class="bottom-nav-btn flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-blue-400 transition" data-view="profile">
+      <i class="fa-solid fa-user text-base"></i>
+      <span>Profile</span>
+    </button>
+  </nav>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 1: FULL SPOT DETAIL MODAL                          -->
+  <!-- ======================================================== -->
+  <div id="modal-spot-detail" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+    <div class="glass-card w-full max-w-lg rounded-3xl border border-slate-700/80 overflow-hidden flex flex-col max-h-[92vh] shadow-2xl">
+      <div class="relative h-48 bg-slate-900 overflow-hidden shrink-0">
+        <img id="detail-photo" src="" alt="" class="w-full h-full object-cover">
+        <button class="btn-close-modal absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+        <span class="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-slate-950/80 text-amber-400 text-xs font-bold border border-amber-500/30 backdrop-blur-md" id="detail-rating">
+          â˜… 4.9 (14 reviews)
+        </span>
+      </div>
+
+      <div class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+        <div>
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-black text-white" id="detail-title">Spot Title</h3>
+            <span class="text-xl font-black text-white" id="detail-price">â‚¹40<span class="text-xs text-slate-400 font-normal">/hr</span></span>
+          </div>
+          <p class="text-slate-400 text-xs mt-1 flex items-center gap-1.5" id="detail-address">
+            <i class="fa-solid fa-location-dot text-blue-400"></i> Address
+          </p>
+        </div>
+
+        <!-- Occupancy Meter -->
+        <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-300">Live Slot Occupancy</span>
+            <span class="text-emerald-400 font-extrabold" id="detail-occupancy">4 of 8 Slots Free</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div id="detail-occupancy-bar" class="h-full bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full" style="width: 50%;"></div>
+          </div>
+        </div>
+
+        <!-- Amenities Badges -->
+        <div>
+          <div class="font-bold text-slate-300 mb-2">Facilities & Security</div>
+          <div class="flex flex-wrap gap-2" id="detail-amenities-tags">
+            <!-- Injected via JavaScript -->
+          </div>
+        </div>
+
+        <!-- Host Card -->
+        <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold">
+              <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <div>
+              <div class="font-bold text-white" id="detail-host-name">Verified Space Host</div>
+              <div class="text-[11px] text-slate-400">Responds in &lt; 5 mins â€¢ CCTV Guarded</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">Verified</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2.5 pt-2">
+          <a id="detail-directions-btn" href="#" target="_blank" class="px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-location-arrow text-blue-400"></i> Map
+          </a>
+          <button id="detail-book-btn" class="flex-1 py-3.5 rounded-2xl btn-stitch-primary font-black text-sm shadow-xl">
+            Book This Parking Spot ðŸš€
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 2: FULL FILTER SHEET MODAL (Mirroring FilterSheet.kt) -->
+  <!-- ======================================================== -->
+  <div id="modal-filter-sheet" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+    <div class="glass-card w-full max-w-md rounded-3xl border border-slate-700/80 overflow-hidden flex flex-col max-h-[90vh] shadow-2xl">
+      <div class="px-6 py-4 border-b border-slate-800/80 flex items-center justify-between">
+        <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-blue-400"></i> Filter Parking
+        </h3>
+        <button class="btn-close-modal text-slate-400 hover:text-white text-base transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-5 overflow-y-auto flex-1 text-xs">
+        
+        <!-- Vehicle Type Filter -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-2">Vehicle Type</label>
+          <div class="grid grid-cols-3 gap-2" id="filter-vehicle-options">
+            <button class="filter-opt-btn active p-2 rounded-xl bg-blue-600 text-white font-bold" data-val="All">All</button>
+            <button class="filter-opt-btn p-2 rounded-xl bg-slate-900/80 text-slate-300 font-medium border border-slate-800" data-val="Two Wheeler">ðŸ›µ Bike</button>
+            <button class="filter-opt-btn p-2 rounded-xl bg-slate-900/80 text-slate-300 font-medium border border-slate-800" data-val="Hatchback">ðŸš— Hatchback</button>
+            <button class="filter-opt-btn p-2 rounded-xl bg-slate-900/80 text-slate-300 font-medium border border-slate-800" data-val="Sedan">ðŸš˜ Sedan</button>
+            <button class="filter-opt-btn p-2 rounded-xl bg-slate-900/80 text-slate-300 font-medium border border-slate-800" data-val="SUV">ðŸš™ SUV</button>
+            <button class="filter-opt-btn p-2 rounded-xl bg-slate-900/80 text-slate-300 font-medium border border-slate-800" data-val="EV">âš¡ EV</button>
+          </div>
+        </div>
+
+        <!-- Price Range Tiers -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-2">Hourly Price Tier</label>
+          <div class="grid grid-cols-2 gap-2" id="filter-price-options">
+            <button class="filter-opt-btn active p-2 rounded-xl bg-blue-600 text-white font-bold" data-val="Any">Any Price</button>
+            <button class="filter-opt-btn p-2 rounded-xl bg-slate-900/80 text-slate-300 font-medium border border-slate-800" data-val="Under 30">Under â‚¹30/hr</button>
+            <button class="filter-opt-btn p-2 rounded-xl bg-slate-900/80 text-slate-300 font-medium border border-slate-800" data-val="30-60">â‚¹30 - â‚¹60/hr</button>
+            <button class="filter-opt-btn p-2 rounded-xl bg-slate-900/80 text-slate-300 font-medium border border-slate-800" data-val="Above 60">â‚¹60+/hr</button>
+          </div>
+        </div>
+
+        <!-- Sort By -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-2">Sort Order</label>
+          <select id="filter-sort-select" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-white text-xs cursor-pointer">
+            <option value="recommended">â­ Recommended (Highest Rated)</option>
+            <option value="price-low">ðŸ·ï¸ Price: Low to High</option>
+            <option value="price-high">ðŸ’Ž Price: High to Low</option>
+            <option value="rating">â˜… Highest Rating Only</option>
+          </select>
+        </div>
+
+        <!-- Required Amenities Checkboxes -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-2">Must-Have Amenities</label>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer">
+              <input type="checkbox" id="f-chk-covered" class="rounded accent-blue-600 w-4 h-4">
+              <span>ðŸš˜ Covered Roof Weather Protection</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer">
+              <input type="checkbox" id="f-chk-cctv" class="rounded accent-blue-600 w-4 h-4">
+              <span>ðŸ“¹ 24/7 CCTV Camera Surveillance</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer">
+              <input type="checkbox" id="f-chk-guard" class="rounded accent-blue-600 w-4 h-4">
+              <span>ðŸ‘® Security Guard on Premise</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer">
+              <input type="checkbox" id="f-chk-ev" class="rounded accent-blue-600 w-4 h-4">
+              <span>âš¡ Fast EV Charging Port Available</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 pt-2">
+          <button id="btn-reset-filters" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+            Reset
+          </button>
+          <button id="btn-apply-filters" class="flex-1 py-3 rounded-xl btn-stitch-primary text-xs font-black shadow-lg">
+            Apply Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 3: DRIVER BOOKING & UPI PAYMENT MODAL              -->
+  <!-- ======================================================== -->
+  <div id="modal-booking" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+    <div class="glass-card w-full max-w-md rounded-3xl border border-slate-700/80 overflow-hidden flex flex-col shadow-2xl">
+      <div class="px-6 py-4 border-b border-slate-800/80 flex items-center justify-between">
+        <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs border border-emerald-500/30">
+            <i class="fa-solid fa-ticket"></i>
+          </div>
+          <span>Reserve Parking Pass</span>
+        </h3>
+        <button class="btn-close-modal text-slate-400 hover:text-white text-base transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs">
+        <div id="booking-spot-summary" class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+          <div>
+            <div class="font-extrabold text-white text-sm" id="bk-title">Parking Space</div>
+            <div class="text-slate-400 text-xs mt-0.5" id="bk-address">Address...</div>
+            <div class="mt-1 text-emerald-400 font-extrabold" id="bk-price">â‚¹40 / hour</div>
+          </div>
+          <a id="bk-directions-btn" href="#" target="_blank" class="px-3 py-1.5 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs font-bold flex items-center gap-1 hover:bg-blue-600 hover:text-white transition">
+            <i class="fa-solid fa-location-arrow text-xs"></i> Map
+          </a>
+        </div>
+
+        <!-- Saved Vehicle Selector -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1.5">Vehicle</label>
+          <div class="grid grid-cols-2 gap-2 mb-2" id="bk-vehicle-preset-container">
+            <!-- Dynamically injected saved vehicles or custom input -->
+          </div>
+          <input type="text" id="bk-reg-no" value="KA-01-AB-1234" required placeholder="Registration Plate No." class="w-full px-4 py-2.5 rounded-xl glass-input text-white text-sm font-mono tracking-wide uppercase">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1.5">Duration</label>
+            <select id="bk-hours" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-white text-xs cursor-pointer">
+              <option value="1">1 Hour</option>
+              <option value="2" selected>2 Hours</option>
+              <option value="4">4 Hours</option>
+              <option value="8">8 Hours (Full Day)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1.5">Select UPI App</label>
+            <select id="bk-upi" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-white text-xs cursor-pointer">
+              <option value="Google Pay">Google Pay</option>
+              <option value="PhonePe">PhonePe</option>
+              <option value="Paytm">Paytm</option>
+              <option value="BHIM UPI">BHIM UPI</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Add-on Services -->
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+          <span class="font-bold text-slate-400 text-[11px] uppercase tracking-wider">Add-on Services</span>
+          <label class="flex items-center justify-between cursor-pointer">
+            <span class="text-slate-300 flex items-center gap-2"><input type="checkbox" id="bk-addon-ev" class="rounded accent-blue-600"> âš¡ EV Top-Up Charge</span>
+            <span class="text-emerald-400 font-bold">+â‚¹99</span>
+          </label>
+        </div>
+
+        <!-- Total Price Summary -->
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 font-semibold text-sm">
+          <span class="text-slate-300 font-bold">Total Amount Payable:</span>
+          <span class="text-emerald-400 font-black text-lg" id="bk-total-amount">â‚¹90</span>
+        </div>
+
+        <button id="btn-confirm-booking" class="w-full py-3.5 rounded-2xl btn-stitch-emerald font-black text-sm shadow-xl">
+          Pay & Confirm Digital Pass ðŸŽ‰
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 4: DIGITAL PASS QR CODE MODAL                      -->
+  <!-- ======================================================== -->
+  <div id="modal-pass" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+    <div class="glass-card w-full max-w-sm rounded-3xl border border-slate-700/80 overflow-hidden text-center p-6 space-y-4 shadow-2xl">
+      <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-2xl border border-emerald-500/30">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <div>
+        <h3 class="text-xl font-black text-white">Booking Confirmed!</h3>
+        <p class="text-xs font-bold text-slate-400 mt-1" id="pass-code">Pass #PS-84920</p>
+      </div>
+
+      <div class="bg-white p-3.5 rounded-2xl inline-block shadow-2xl mx-auto border-4 border-slate-800" id="qrcode-container"></div>
+
+      <div class="text-xs text-slate-300 space-y-1 text-left bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
+        <div class="font-bold text-white text-sm" id="pass-spot-name">Parking Spot</div>
+        <div id="pass-time" class="text-slate-400">Valid Today â€¢ 2 Hours</div>
+        <div id="pass-reg" class="text-emerald-400 font-mono font-bold">Vehicle: KA-01-AB-1234</div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a id="pass-maps-btn" href="#" target="_blank" class="flex-1 py-3 rounded-2xl btn-stitch-primary text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-lg">
+          <i class="fa-solid fa-location-arrow"></i> Maps Navigation
+        </a>
+        <button class="btn-close-modal px-4 py-3 rounded-2xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-700 transition">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 5: RATING & REVIEW MODAL (5-Star + Tags)          -->
+  <!-- ======================================================== -->
+  <div id="modal-rating" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+    <div class="glass-card w-full max-w-md rounded-3xl border border-slate-700/80 overflow-hidden text-center p-6 space-y-4 shadow-2xl">
+      <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl border border-amber-500/30">
+        <i class="fa-solid fa-star"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-black text-white">Rate Your Parking Session</h3>
+        <p class="text-xs text-slate-400 mt-0.5" id="rating-spot-title">Parking Spot</p>
+      </div>
+
+      <!-- Star Rating -->
+      <div class="flex items-center justify-center gap-2 py-1" id="star-rating-stars">
+        <i class="fa-solid fa-star star-btn active" data-rating="1"></i>
+        <i class="fa-solid fa-star star-btn active" data-rating="2"></i>
+        <i class="fa-solid fa-star star-btn active" data-rating="3"></i>
+        <i class="fa-solid fa-star star-btn active" data-rating="4"></i>
+        <i class="fa-solid fa-star star-btn active" data-rating="5"></i>
+      </div>
+      <div class="text-xs font-bold text-amber-400" id="star-rating-text">Excellent (5 Stars)</div>
+
+      <!-- Review Feedback Tags -->
+      <div class="text-left space-y-1.5">
+        <label class="text-[11px] font-bold text-slate-400">Quick Tags</label>
+        <div class="flex flex-wrap gap-2" id="rating-tag-container">
+          <button type="button" class="rating-tag-chip px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 hover:border-blue-500">ðŸ§¼ Clean & Well-Lit</button>
+          <button type="button" class="rating-tag-chip px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 hover:border-blue-500">ðŸ›¡ï¸ Safe & Guarded</button>
+          <button type="button" class="rating-tag-chip px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 hover:border-blue-500">ðŸš— Wide Entry Gate</button>
+          <button type="button" class="rating-tag-chip px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 hover:border-blue-500">âš¡ EV Charging Worked</button>
+        </div>
+      </div>
+
+      <!-- Review Text Input -->
+      <textarea id="rating-comment" rows="3" placeholder="Share any feedback for host or other drivers..." class="w-full px-4 py-2.5 rounded-xl glass-input text-white text-xs"></textarea>
+
+      <div class="flex items-center gap-2">
+        <button class="btn-close-modal flex-1 py-3 rounded-2xl bg-slate-800 text-slate-300 text-xs font-bold transition">Skip</button>
+        <button id="btn-submit-review" class="flex-1 py-3 rounded-2xl btn-stitch-primary text-xs font-black shadow-lg">Submit Review</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 6: 24/7 HELPLINE & EMERGENCY ASSISTANCE            -->
+  <!-- ======================================================== -->
+  <div id="modal-emergency" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+    <div class="glass-card w-full max-w-md rounded-3xl border border-rose-500/40 overflow-hidden p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-lg border border-rose-500/30">
+            <i class="fa-solid fa-phone-volume"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">24/7 Roadside Assistance</h3>
+            <p class="text-[11px] text-slate-400">Instant driver emergency helpline</p>
+          </div>
+        </div>
+        <button class="btn-close-modal text-slate-400 hover:text-white text-base transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2.5 text-xs">
+        <a href="tel:18001237275" class="p-3.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 flex items-center justify-between transition">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-phone text-rose-400 text-base"></i>
+            <div>
+              <div class="font-extrabold text-white">Call Parking Toll-Free Helpline</div>
+              <div class="text-[11px] text-slate-400">1800-123-PARK (24/7 Available)</div>
+            </div>
+          </div>
+          <i class="fa-solid fa-arrow-up-right-from-square text-rose-400"></i>
+        </a>
+
+        <a href="https://wa.me/919876543210?text=Hello%20ParkEasy%20Emergency%20Helpline" target="_blank" class="p-3.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-between transition">
+          <div class="flex items-center gap-3">
+            <i class="fa-brands fa-whatsapp text-emerald-400 text-lg"></i>
+            <div>
+              <div class="font-extrabold text-white">WhatsApp Emergency Chat</div>
+              <div class="text-[11px] text-slate-400">Instant live location sharing & tow help</div>
+            </div>
+          </div>
+          <i class="fa-solid fa-arrow-up-right-from-square text-emerald-400"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 7: ADD SAVED VEHICLE MODAL                         -->
+  <!-- ======================================================== -->
+  <div id="modal-add-vehicle" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+    <div class="glass-card w-full max-w-md rounded-3xl border border-slate-700/80 overflow-hidden p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-car-side text-blue-400"></i> Add Vehicle to Profile
+        </h3>
+        <button class="btn-close-modal text-slate-400 hover:text-white text-base transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="form-add-vehicle" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-300 mb-1.5">Vehicle Type</label>
+          <select id="v-type" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-white text-xs cursor-pointer">
+            <option value="Hatchback">ðŸš— Hatchback</option>
+            <option value="Sedan">ðŸš˜ Sedan</option>
+            <option value="SUV">ðŸš™ SUV / Crossover</option>
+            <option value="Two Wheeler">ðŸ›µ Two Wheeler / Bike</option>
+            <option value="EV">âš¡ Electric Vehicle (EV)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1.5">Registration Number *</label>
+          <input type="text" id="v-reg" required placeholder="e.g. KA-01-AB-1234" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-white text-xs font-mono uppercase tracking-wider">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1.5">Vehicle Make / Model</label>
+          <input type="text" id="v-model" placeholder="e.g. Tata Nexon EV / Honda City" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-white text-xs">
+        </div>
+
+        <button type="submit" class="w-full py-3.5 rounded-2xl btn-stitch-primary font-black text-xs shadow-lg">
+          Save Vehicle ðŸš—
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 8: NOTIFICATIONS MODAL                            -->
+  <!-- ======================================================== -->
+  <div id="modal-notifications" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+    <div class="glass-card w-full max-w-md rounded-3xl border border-slate-700/80 overflow-hidden p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-bell text-blue-400"></i> Notifications
+        </h3>
+        <button class="btn-close-modal text-slate-400 hover:text-white text-base transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2.5 text-xs" id="notifications-list">
+        <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div>
+            <div class="font-bold text-white">Live Firebase Firestore Connected</div>
+            <div class="text-slate-400 text-[11px]">Real-time synchronization active for parking spaces and passes.</div>
+            <div class="text-[10px] text-slate-500 mt-1">Just now</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 9: LANGUAGE SELECTOR MODAL                         -->
+  <!-- ======================================================== -->
+  <div id="modal-language" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+    <div class="glass-card w-full max-w-sm rounded-3xl border border-slate-700/80 overflow-hidden p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-globe text-blue-400"></i> Select App Language
+        </h3>
+        <button class="btn-close-modal text-slate-400 hover:text-white text-base transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <button class="lang-opt-btn w-full p-3.5 rounded-2xl bg-blue-600/20 border border-blue-500/40 text-left flex items-center justify-between text-white font-bold" data-lang="en">
+          <span>ðŸ‡¬ðŸ‡§ English (Default)</span>
+          <i class="fa-solid fa-check text-blue-400"></i>
+        </button>
+        <button class="lang-opt-btn w-full p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 text-left flex items-center justify-between text-slate-300 hover:text-white" data-lang="hi">
+          <span>ðŸ‡®ðŸ‡³ à¤¹à¤¿à¤¨à¥à¤¦à¥€ (Hindi)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 10: LIST MY SPACE WIZARD MODAL (Host Publishing)    -->
+  <!-- ======================================================== -->
   <div id="modal-list-space" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
     <div class="glass-card w-full max-w-xl rounded-3xl border border-slate-700/80 overflow-hidden flex flex-col max-h-[90vh]">
       
@@ -251,7 +1136,7 @@
         <!-- GPS Auto Pinning Card -->
         <div class="p-4 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-blue-600/10 border border-blue-500/30 flex items-center justify-between cursor-pointer hover:border-blue-500/60 transition shadow-inner" id="btn-gps-pin-modal">
           <div class="flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black shadow-lg shadow-blue-600/30">📍</div>
+            <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black shadow-lg shadow-blue-600/30">ðŸ“</div>
             <div>
               <div class="font-extrabold text-blue-400 text-sm">Detect & Pin Current GPS Coordinates</div>
               <div class="text-slate-400 text-[11px]" id="gps-pin-status">Auto-fill address & save exact latitude/longitude map pin</div>
@@ -273,7 +1158,7 @@
             </select>
           </div>
           <div>
-            <label class="block font-bold text-slate-300 mb-1.5">City (Dependent) *</label>
+            <label class="block font-bold text-slate-300 mb-1.5">City *</label>
             <select id="space-city" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-white text-sm cursor-pointer">
               <!-- Cities populated dynamically based on selected State -->
             </select>
@@ -298,7 +1183,7 @@
 
         <div class="grid grid-cols-3 gap-3">
           <div>
-            <label class="block font-bold text-slate-300 mb-1.5">Hourly Rate (₹) *</label>
+            <label class="block font-bold text-slate-300 mb-1.5">Hourly Rate (â‚¹) *</label>
             <input type="number" id="space-price" required value="40" min="10" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-white text-sm font-bold">
           </div>
           <div>
@@ -329,106 +1214,10 @@
         </div>
 
         <button type="submit" class="w-full py-3.5 rounded-2xl btn-stitch-primary font-black text-sm shadow-xl">
-          Publish Space to Cloud Database 🚀
+          Publish Space to Cloud Database ðŸš€
         </button>
       </form>
 
-    </div>
-  </div>
-
-  <!-- Modal 2: Driver Booking & UPI Payment Modal -->
-  <div id="modal-booking" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
-    <div class="glass-card w-full max-w-md rounded-3xl border border-slate-700/80 overflow-hidden flex flex-col shadow-2xl">
-      
-      <div class="px-6 py-4 border-b border-slate-800/80 flex items-center justify-between">
-        <h3 class="text-lg font-extrabold text-white flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/30">
-            <i class="fa-solid fa-ticket"></i>
-          </div>
-          <span>Reserve Parking Pass</span>
-        </h3>
-        <button class="btn-close-modal text-slate-400 hover:text-white text-lg transition">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="p-6 space-y-4 text-xs">
-        <div id="booking-spot-summary" class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
-          <div>
-            <div class="font-extrabold text-white text-sm" id="bk-title">Parking Space</div>
-            <div class="text-slate-400 text-xs mt-0.5" id="bk-address">Address...</div>
-            <div class="mt-1 text-emerald-400 font-extrabold" id="bk-price">₹40 / hour</div>
-          </div>
-          <a id="bk-directions-btn" href="#" target="_blank" class="px-3.5 py-2 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs font-bold flex items-center gap-1.5 hover:bg-blue-600 hover:text-white transition">
-            <i class="fa-solid fa-location-arrow text-xs"></i> Map
-          </a>
-        </div>
-
-        <div>
-          <label class="block font-bold text-slate-300 mb-1.5">Vehicle Registration Number *</label>
-          <input type="text" id="bk-reg-no" value="KA-01-AB-1234" required class="w-full px-4 py-2.5 rounded-xl glass-input text-white text-sm font-mono tracking-wide uppercase">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-300 mb-1.5">Duration (Hours)</label>
-            <select id="bk-hours" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-white text-sm cursor-pointer">
-              <option value="1">1 Hour</option>
-              <option value="2" selected>2 Hours</option>
-              <option value="4">4 Hours</option>
-              <option value="8">8 Hours (Full Day)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-300 mb-1.5">Select UPI App</label>
-            <select id="bk-upi" class="w-full px-3.5 py-2.5 rounded-xl glass-input text-white text-sm cursor-pointer">
-              <option value="Google Pay">Google Pay</option>
-              <option value="PhonePe">PhonePe</option>
-              <option value="Paytm">Paytm</option>
-              <option value="BHIM UPI">BHIM UPI</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Total Price Summary -->
-        <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-900/60 border border-slate-800 font-semibold text-sm">
-          <span class="text-slate-300 font-bold">Total Amount Payable:</span>
-          <span class="text-emerald-400 font-black text-lg" id="bk-total-amount">₹90</span>
-        </div>
-
-        <button id="btn-confirm-booking" class="w-full py-3.5 rounded-2xl btn-stitch-emerald font-black text-sm shadow-xl">
-          Pay & Confirm Digital Pass 🎉
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Modal 3: Digital Pass QR Code Modal -->
-  <div id="modal-pass" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
-    <div class="glass-card w-full max-w-sm rounded-3xl border border-slate-700/80 overflow-hidden text-center p-6 space-y-4 shadow-2xl">
-      <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-2xl border border-emerald-500/30">
-        <i class="fa-solid fa-circle-check"></i>
-      </div>
-      <div>
-        <h3 class="text-xl font-black text-white">Booking Confirmed!</h3>
-        <p class="text-xs font-bold text-slate-400 mt-1" id="pass-code">Pass #PS-84920</p>
-      </div>
-
-      <div class="bg-white p-4 rounded-2xl inline-block shadow-2xl mx-auto border-4 border-slate-800" id="qrcode-container"></div>
-
-      <div class="text-xs text-slate-300 space-y-1 text-left bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-        <div class="font-bold text-white text-sm" id="pass-spot-name">Parking Spot</div>
-        <div id="pass-time" class="text-slate-400">Valid Today • 2 Hours</div>
-        <div id="pass-reg" class="text-emerald-400 font-mono font-bold">Vehicle: KA-01-AB-1234</div>
-      </div>
-
-      <div class="flex items-center gap-2.5">
-        <a id="pass-maps-btn" href="#" target="_blank" class="flex-1 py-3 rounded-2xl btn-stitch-primary text-xs font-extrabold flex items-center justify-center gap-2 shadow-lg">
-          <i class="fa-solid fa-location-arrow"></i> Google Maps Navigation
-        </a>
-        <button class="btn-close-modal px-4 py-3 rounded-2xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-700 transition">Done</button>
-      </div>
     </div>
   </div>
 
@@ -436,7 +1225,7 @@
   <footer class="mt-auto border-t border-slate-800/80 py-6 px-4 text-center text-xs text-slate-500 z-10">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
       <div>
-        © 2026 ParkEasy Platform • Powered by Real-Time Firebase Cloud Firestore
+        Â© 2026 ParkEasy Platform â€¢ Powered by Real-Time Firebase Cloud Firestore
       </div>
       <div class="flex items-center gap-4 text-slate-400">
         <a href="https://github.com/RazabSaifi/ParkEasy1" target="_blank" class="hover:text-blue-400 transition flex items-center gap-1.5 font-bold">
@@ -453,4 +1242,3 @@
   <script type="module" src="app.js"></script>
 </body>
 </html>
-
