@@ -425,8 +425,8 @@
         <!-- Map Layer Status Badge (Top-Left) -->
         <div class="absolute top-4 left-4 z-20 flex items-center gap-2">
           <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-950/85 backdrop-blur-md border border-slate-800 text-xs font-bold text-white shadow-xl">
-            <i class="fa-solid fa-map-location-dot text-blue-400"></i>
-            <span id="map-engine-label">Dark Mode Map</span>
+            <i class="fa-brands fa-google text-blue-400"></i>
+            <span id="map-engine-label">Google Maps</span>
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
           </div>
         </div>
@@ -1250,7 +1250,10 @@
     </div>
   </footer>
 
-  <!-- High-Performance Interactive Map Engine -->
+  <!-- Official Google Maps JavaScript API (Web Key) -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-5uDPFT4-UFGj54nshLh1WHZb0iNC2pw&libraries=places,geometry"></script>
+
+  <!-- Interactive Map Engine Fallback -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Application JS -->
