@@ -1,4 +1,4 @@
-﻿// ParkEasy Real-Time Web Application Logic (Firebase Cloud Firestore v10)
+// ParkEasy Real-Time Web Application Logic (Firebase Cloud Firestore v10)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
   getFirestore, 
@@ -118,7 +118,7 @@ function setupRealtimeListeners() {
       });
     });
 
-    console.log(`ðŸ”¥ Real-Time Firestore Sync: ${allSpaces.length} parking spaces loaded.`);
+    console.log(`Real-Time Firestore Sync: ${allSpaces.length} parking spaces loaded.`);
     renderHomeFeatured();
     renderExploreSpots();
     renderMapMarkers();
@@ -134,7 +134,7 @@ function setupRealtimeListeners() {
       allBookings.push({ docId: docSnap.id, ...docSnap.data() });
     });
 
-    console.log(`ðŸ”¥ Real-Time Firestore Sync: ${allBookings.length} bookings loaded.`);
+    console.log(`Real-Time Firestore Sync: ${allBookings.length} bookings loaded.`);
     updateActivePassesBadge();
     renderBookings();
     renderHomeActivePassBanner();
@@ -259,7 +259,7 @@ function getFilteredSpaces() {
     // 3. Quick Filter Pills
     if (activeCategoryFilter === "Covered" && !space.isCovered) return false;
     if (activeCategoryFilter === "EV Charging" && !space.hasEvCharging) return false;
-    if (activeCategoryFilter === "Under â‚¹50" && space.hourlyPrice > 50) return false;
+    if (activeCategoryFilter === "Under ₹50" && space.hourlyPrice > 50) return false;
     if (activeCategoryFilter === "24/7" && !space.has24x7Access) return false;
     if (activeCategoryFilter === "CCTV" && !space.hasCctv) return false;
 
@@ -325,13 +325,13 @@ function renderHomeFeatured() {
               </span>
               ${space.hasEvCharging ? `
                 <span class="px-2 py-0.5 rounded-full bg-emerald-500/90 text-white text-[10px] font-black backdrop-blur-md shadow-md">
-                  âš¡ EV
+                  <i class="fa-solid fa-bolt mr-1"></i>EV
                 </span>
               ` : ''}
             </div>
 
             <span class="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-slate-950/85 text-amber-400 text-[11px] font-black backdrop-blur-md border border-amber-500/30">
-              â˜… ${space.rating || 4.9} (${space.reviewsCount || 14})
+              <i class="fa-solid fa-star text-amber-400 mr-1 text-[10px]"></i>${space.rating || 4.9}
             </span>
           </div>
 
@@ -348,16 +348,16 @@ function renderHomeFeatured() {
 
           <!-- Amenities Icons -->
           <div class="flex items-center gap-2 mt-3 text-[11px] text-slate-300">
-            <span class="px-2 py-0.5 rounded-lg bg-slate-900/80 border border-slate-800">${space.isCovered ? 'ðŸš˜ Covered' : 'â˜€ï¸ Open'}</span>
-            ${space.hasCctv ? '<span class="px-2 py-0.5 rounded-lg bg-slate-900/80 border border-slate-800">ðŸ“¹ CCTV</span>' : ''}
-            ${space.hasSecurityGuard ? '<span class="px-2 py-0.5 rounded-lg bg-slate-900/80 border border-slate-800">ðŸ‘® Guard</span>' : ''}
+            <span class="px-2 py-0.5 rounded-lg bg-slate-900/80 border border-slate-800">${space.isCovered ? '<i class="fa-solid fa-warehouse mr-1 text-blue-400"></i>Covered' : '<i class="fa-solid fa-sun mr-1 text-amber-400"></i>Open'}</span>
+            ${space.hasCctv ? '<span class="px-2 py-0.5 rounded-lg bg-slate-900/80 border border-slate-800"><i class="fa-solid fa-video mr-1 text-emerald-400"></i>CCTV</span>' : ''}
+            ${space.hasSecurityGuard ? '<span class="px-2 py-0.5 rounded-lg bg-slate-900/80 border border-slate-800"><i class="fa-solid fa-shield-halved mr-1 text-purple-400"></i>Guard</span>' : ''}
           </div>
         </div>
 
         <!-- Price & Booking CTA -->
         <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80">
           <div>
-            <span class="text-xl font-black text-white">â‚¹${space.hourlyPrice}</span>
+            <span class="text-xl font-black text-white">₹${space.hourlyPrice}</span>
             <span class="text-xs text-slate-400 font-medium">/hr</span>
           </div>
           <div class="flex items-center gap-2" onclick="event.stopPropagation()">
@@ -406,11 +406,11 @@ function renderExploreSpots() {
             <img src="${space.parkingPhoto}" alt="${space.title}" class="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500">
             ${space.hasEvCharging ? `
               <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-emerald-500/90 text-white text-[10px] font-black tracking-wide shadow-md">
-                âš¡ EV
+                <i class="fa-solid fa-bolt mr-1"></i>EV
               </span>
             ` : ''}
             <span class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-slate-950/80 text-amber-400 text-[10px] font-bold border border-amber-500/30">
-              â˜… ${space.rating || 4.9}
+              <i class="fa-solid fa-star text-amber-400 mr-1 text-[10px]"></i>${space.rating || 4.9}
             </span>
           </div>
 
@@ -433,14 +433,14 @@ function renderExploreSpots() {
 
             <div class="flex items-center gap-2 text-[11px] text-slate-300 mt-2">
               <span class="px-2 py-0.5 rounded-lg bg-slate-900/80 border border-slate-800 font-medium">
-                ${space.isCovered ? 'ðŸš˜ Covered' : 'â˜€ï¸ Open Surface'}
+                ${space.isCovered ? '<i class="fa-solid fa-warehouse mr-1 text-blue-400"></i>Covered' : '<i class="fa-solid fa-sun mr-1 text-amber-400"></i>Open Surface'}
               </span>
-              ${space.hasCctv ? '<span class="px-2 py-0.5 rounded-lg bg-slate-900/80 border border-slate-800">ðŸ“¹ CCTV</span>' : ''}
+              ${space.hasCctv ? '<span class="px-2 py-0.5 rounded-lg bg-slate-900/80 border border-slate-800"><i class="fa-solid fa-video mr-1 text-emerald-400"></i>CCTV</span>' : ''}
             </div>
 
             <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-800/80" onclick="event.stopPropagation()">
               <div>
-                <span class="text-xl font-black text-white">â‚¹${space.hourlyPrice}</span>
+                <span class="text-xl font-black text-white">₹${space.hourlyPrice}</span>
                 <span class="text-xs text-slate-400 font-semibold">/hr</span>
               </div>
               <div class="flex items-center gap-2">
@@ -470,7 +470,7 @@ function renderMapMarkers() {
   const filtered = getFilteredSpaces();
   filtered.forEach(space => {
     const mapsUrl = getSmartMapsUrl(space);
-    const pinHtml = `<div class="custom-map-pin"><span>â‚¹${space.hourlyPrice}</span></div>`;
+    const pinHtml = `<div class="custom-map-pin"><span>₹${space.hourlyPrice}</span></div>`;
     const icon = L.divIcon({
       html: pinHtml,
       className: '',
@@ -487,11 +487,11 @@ function renderMapMarkers() {
           <i class="fa-solid fa-location-dot text-blue-400"></i> ${space.area}, ${space.city}
         </div>
         <div class="flex items-center justify-between pt-1">
-          <span class="text-emerald-400 font-black text-sm">â‚¹${space.hourlyPrice} <span class="text-[10px] text-slate-400 font-normal">/hr</span></span>
-          <span class="text-amber-400 font-bold">â˜… ${space.rating || 4.9}</span>
+          <span class="text-emerald-400 font-black text-sm">₹${space.hourlyPrice} <span class="text-[10px] text-slate-400 font-normal">/hr</span></span>
+          <span class="text-amber-400 font-bold"><i class="fa-solid fa-star text-amber-400 text-xs mr-0.5"></i>${space.rating || 4.9}</span>
         </div>
         <a href="${mapsUrl}" target="_blank" class="block w-full py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl text-center shadow-md transition">
-          ðŸ§­ Navigate Google Maps
+          <i class="fa-solid fa-location-arrow mr-1.5"></i>Navigate Google Maps
         </a>
       </div>
     `;
@@ -517,9 +517,9 @@ window.openSpotDetailModal = function(spotId) {
 
   document.getElementById("detail-photo").src = spot.parkingPhoto;
   document.getElementById("detail-title").textContent = spot.title;
-  document.getElementById("detail-price").innerHTML = `â‚¹${spot.hourlyPrice}<span class="text-xs text-slate-400 font-normal">/hr</span>`;
+  document.getElementById("detail-price").innerHTML = `₹${spot.hourlyPrice}<span class="text-xs text-slate-400 font-normal">/hr</span>`;
   document.getElementById("detail-address").innerHTML = `<i class="fa-solid fa-location-dot text-blue-400"></i> ${spot.address || spot.area}, ${spot.city}`;
-  document.getElementById("detail-rating").textContent = `â˜… ${spot.rating || 4.9} (${spot.reviewsCount || 14} reviews)`;
+  document.getElementById("detail-rating").innerHTML = `<i class="fa-solid fa-star text-amber-400 mr-1"></i>${spot.rating || 4.9} (${spot.reviewsCount || 14} reviews)`;
   
   const cap = spot.vehicleCapacity || 6;
   const freeSlots = Math.max(1, cap - 2);
@@ -528,11 +528,11 @@ window.openSpotDetailModal = function(spotId) {
 
   const amenitiesTagsEl = document.getElementById("detail-amenities-tags");
   amenitiesTagsEl.innerHTML = `
-    <span class="px-2.5 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300">${spot.isCovered ? 'ðŸš˜ Covered Roof' : 'â˜€ï¸ Open Surface'}</span>
-    ${spot.hasCctv ? '<span class="px-2.5 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300">ðŸ“¹ 24/7 CCTV Camera</span>' : ''}
-    ${spot.hasSecurityGuard ? '<span class="px-2.5 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300">ðŸ‘® Security Guard</span>' : ''}
-    ${spot.hasEvCharging ? '<span class="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">âš¡ Fast EV Charger</span>' : ''}
-    ${spot.has24x7Access ? '<span class="px-2.5 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300">ðŸ•’ 24/7 Access</span>' : ''}
+    <span class="px-2.5 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300">${spot.isCovered ? '<i class="fa-solid fa-warehouse mr-1 text-blue-400"></i>Covered Roof' : '<i class="fa-solid fa-sun mr-1 text-amber-400"></i>Open Surface'}</span>
+    ${spot.hasCctv ? '<span class="px-2.5 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300"><i class="fa-solid fa-video mr-1 text-emerald-400"></i>24/7 CCTV Camera</span>' : ''}
+    ${spot.hasSecurityGuard ? '<span class="px-2.5 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300"><i class="fa-solid fa-shield-halved mr-1 text-purple-400"></i>Security Guard</span>' : ''}
+    ${spot.hasEvCharging ? '<span class="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"><i class="fa-solid fa-bolt mr-1 text-amber-400"></i>Fast EV Charger</span>' : ''}
+    ${spot.has24x7Access ? '<span class="px-2.5 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300"><i class="fa-solid fa-clock mr-1 text-amber-400"></i>24/7 Access</span>' : ''}
   `;
 
   document.getElementById("detail-directions-btn").href = mapsUrl;
@@ -568,7 +568,7 @@ function updateActivePassesBadge() {
     mobBadge.classList.toggle("hidden", count === 0);
   }
   if (tabActive) {
-    tabActive.textContent = `Active (${count})`;
+    tabActive.textContent = count > 0 ? `Active (${count})` : "Active";
   }
 }
 
@@ -584,7 +584,7 @@ function renderHomeActivePassBanner() {
 
   banner.classList.remove("hidden");
   document.getElementById("home-pass-spot-name").textContent = active.parkingTitle || "Reserved Parking Spot";
-  document.getElementById("home-pass-vehicle").textContent = `Vehicle: ${active.vehicleRegNumber || 'KA-01-AB-1234'} â€¢ Pass #${active.bookingCode}`;
+  document.getElementById("home-pass-vehicle").textContent = `Vehicle: ${active.vehicleRegNumber || 'KA-01-AB-1234'} · Pass #${active.bookingCode}`;
   
   const spot = allSpaces.find(s => s.id === active.parkingSpaceId);
   const mapsUrl = getSmartMapsUrl(spot || { title: active.parkingTitle, address: active.parkingAddress, city: active.parkingCity });
@@ -643,7 +643,7 @@ function renderBookings() {
             </div>
           </div>
           <div class="text-left sm:text-right">
-            <div class="text-lg font-black text-emerald-400">â‚¹${b.totalAmount || 80}</div>
+            <div class="text-lg font-black text-emerald-400">₹${b.totalAmount || 80}</div>
             <div class="text-[11px] text-slate-500 font-mono">Pass #${b.bookingCode}</div>
           </div>
         </div>
@@ -684,7 +684,7 @@ function renderBookings() {
           ` : `
             <div class="flex items-center gap-2 w-full sm:w-auto">
               <button class="px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold transition" onclick="window.openRatingModal('${b.parkingTitle}', '${b.parkingSpaceId}')">
-                â˜… Rate & Review
+                <i class="fa-solid fa-star mr-1 text-amber-400"></i>Rate & Review
               </button>
               <button class="px-4 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 text-xs font-bold transition" onclick="window.switchView('explore')">
                 Re-Book
@@ -725,7 +725,7 @@ function showDigitalPassModal(booking) {
 
   document.getElementById("pass-code").textContent = `Pass #${booking.bookingCode}`;
   document.getElementById("pass-spot-name").textContent = booking.parkingTitle || "Parking Spot";
-  document.getElementById("pass-time").textContent = `Valid Today â€¢ ${booking.durationHours || 2} Hours â€¢ ${booking.paymentMethod || 'UPI'}`;
+  document.getElementById("pass-time").textContent = `Valid Today · ${booking.durationHours || 2} Hours · ${booking.paymentMethod || 'UPI'}`;
   document.getElementById("pass-reg").textContent = `Vehicle: ${(booking.vehicleRegNumber || 'KA-01-AB-1234').toUpperCase()}`;
 
   const spot = allSpaces.find(s => s.id === booking.parkingSpaceId);
@@ -806,7 +806,7 @@ function openBookingModal(spot) {
 
   document.getElementById("bk-title").textContent = spot.title;
   document.getElementById("bk-address").textContent = `${spot.area}, ${spot.city}`;
-  document.getElementById("bk-price").textContent = `â‚¹${spot.hourlyPrice} / hour`;
+  document.getElementById("bk-price").textContent = `₹${spot.hourlyPrice} / hour`;
   
   const btnDirections = document.getElementById("bk-directions-btn");
   if (btnDirections) btnDirections.href = mapsUrl;
@@ -831,7 +831,7 @@ function updateBookingTotal() {
   const hours = parseInt(document.getElementById("bk-hours").value);
   const evAddon = document.getElementById("bk-addon-ev")?.checked ? 99 : 0;
   const total = (selectedSpotForBooking.hourlyPrice * hours) + evAddon + 10;
-  document.getElementById("bk-total-amount").textContent = `â‚¹${total}`;
+  document.getElementById("bk-total-amount").textContent = `₹${total}`;
 }
 
 async function confirmBooking() {
@@ -898,12 +898,12 @@ function updateHostDashboard() {
             <img src="${s.parkingPhoto}" class="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-700">
             <div>
               <div class="font-extrabold text-white text-sm">${s.title}</div>
-              <div class="text-slate-400">${s.area}, ${s.city} â€¢ â‚¹${s.hourlyPrice}/hr â€¢ Capacity: ${s.vehicleCapacity || 4} cars</div>
+              <div class="text-slate-400">${s.area}, ${s.city} · ₹${s.hourlyPrice}/hr · Capacity: ${s.vehicleCapacity || 4} cars</div>
             </div>
           </div>
           <div class="flex items-center gap-3">
             <span class="px-2.5 py-1 rounded-full ${s.isOnline !== false ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'} font-bold text-[11px]">
-              ${s.isOnline !== false ? 'ðŸŸ¢ Live Online' : 'ðŸ”´ Offline'}
+              ${s.isOnline !== false ? '<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1"></span>Live Online' : '<span class="inline-block w-2 h-2 rounded-full bg-rose-400 mr-1"></span>Offline'}
             </span>
             <button class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold transition" onclick="window.toggleSpotOnline('${s.docId || s.id}', ${s.isOnline !== false})">
               Toggle
@@ -925,7 +925,7 @@ function updateHostDashboard() {
             <span class="text-slate-400 ml-2 font-mono">${b.vehicleRegNumber || 'KA-01-AB-1234'}</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="font-extrabold text-emerald-400">â‚¹${b.totalAmount || 80}</span>
+            <span class="font-extrabold text-emerald-400">₹${b.totalAmount || 80}</span>
             <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold text-[10px]">${b.status}</span>
           </div>
         </div>
@@ -957,22 +957,22 @@ function renderProfileVehicles() {
   }
 
   const icons = {
-    "EV": "âš¡",
-    "Two Wheeler": "ðŸ›µ",
-    "Hatchback": "ðŸš—",
-    "Sedan": "ðŸš˜",
-    "SUV": "ðŸš™"
+    "EV": '<i class="fa-solid fa-bolt text-emerald-400"></i>',
+    "Two Wheeler": '<i class="fa-solid fa-motorcycle text-purple-400"></i>',
+    "Hatchback": '<i class="fa-solid fa-car text-blue-400"></i>',
+    "Sedan": '<i class="fa-solid fa-car-side text-sky-400"></i>',
+    "SUV": '<i class="fa-solid fa-truck-pickup text-indigo-400"></i>'
   };
 
   container.innerHTML = savedVehicles.map(v => `
     <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center text-lg">
-          ${icons[v.type] || 'ðŸš—'}
+          ${icons[v.type] || '<i class="fa-solid fa-car text-blue-400"></i>'}
         </div>
         <div>
           <div class="font-bold text-white text-sm">${v.model}</div>
-          <div class="text-slate-400 font-mono">${v.reg} â€¢ ${v.type}</div>
+          <div class="text-slate-400 font-mono">${v.reg} · ${v.type}</div>
         </div>
       </div>
       <button class="w-8 h-8 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 flex items-center justify-center transition" onclick="window.deleteVehicle(${v.id})" title="Delete Vehicle">
@@ -1034,14 +1034,14 @@ function initLocationSelectors() {
   if (!stateSelect || !citySelectModal) return;
 
   stateSelect.innerHTML = Object.keys(indianLocationData).map(st => 
-    `<option value="${st}" ${st === "Karnataka" ? "selected" : ""}>ðŸ“ ${st}</option>`
+    `<option value="${st}" ${st === "Karnataka" ? "selected" : ""}>${st}</option>`
   ).join("");
 
   function updateCitiesForState() {
     const selectedState = stateSelect.value;
     const cities = indianLocationData[selectedState] || ["Bengaluru"];
     citySelectModal.innerHTML = cities.map(c => 
-      `<option value="${c}">ðŸ¢ ${c}</option>`
+      `<option value="${c}">${c}</option>`
     ).join("");
   }
 
@@ -1111,7 +1111,7 @@ async function publishNewSpace(e) {
 
   try {
     await setDoc(docRef, spaceData);
-    alert(`ðŸŽ‰ Success! '${title}' in ${city} is now live on the platform!`);
+    alert(`Success! '${title}' in ${city} is now live on the platform!`);
     document.getElementById("modal-list-space").classList.add("hidden");
     document.getElementById("form-list-space").reset();
   } catch (err) {
@@ -1231,7 +1231,7 @@ function setupEventListeners() {
           L.circle([lat, lng], { radius: 1000, color: '#059669', fillColor: '#059669', fillOpacity: 0.15 }).addTo(map);
         }
         if (btnNearMe) btnNearMe.innerHTML = `<i class="fa-solid fa-location-crosshairs text-emerald-400"></i><span>GPS Pin</span>`;
-        alert(`ðŸ“ GPS Position Locked: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+        alert(`GPS Position Locked: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
       }, (err) => {
         if (btnNearMe) btnNearMe.innerHTML = `<i class="fa-solid fa-location-crosshairs text-emerald-400"></i><span>GPS Pin</span>`;
         alert("Geolocation error: " + err.message);
@@ -1329,7 +1329,7 @@ function setupEventListeners() {
   });
 
   document.getElementById("btn-submit-review")?.addEventListener("click", () => {
-    alert(`â­ Thank you! Your ${currentRatingVal}-star rating and review have been submitted.`);
+    alert(`Thank you! Your ${currentRatingVal}-star rating and review have been submitted.`);
     document.getElementById("modal-rating").classList.add("hidden");
   });
 
