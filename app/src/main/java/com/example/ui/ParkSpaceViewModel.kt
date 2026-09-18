@@ -68,7 +68,7 @@ class ParkSpaceViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         val db = AppDatabase.getDatabase(application, viewModelScope)
-        repository = ParkSpaceRepository(db)
+        repository = ParkSpaceRepository(db, application, viewModelScope)
         viewModelScope.launch {
             repository.ensureDemoDataInitialized()
         }

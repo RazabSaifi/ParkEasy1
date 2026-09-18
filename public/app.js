@@ -31,7 +31,7 @@ let allBookings = [];
 let currentView = "home"; // 'home', 'explore', 'bookings', 'host', 'profile'
 let activeCategoryFilter = "All";
 let selectedVehicleCategory = "All";
-let selectedCityFilter = "Bengaluru";
+let selectedCityFilter = "All Cities";
 let currentSearchQuery = "";
 let selectedSpotForDetail = null;
 let selectedSpotForBooking = null;
@@ -213,6 +213,13 @@ function initLeafletFallback(mapEl, defaultLat, defaultLng) {
 // REAL-TIME FIRESTORE LISTENERS
 // ==========================================
 function setupRealtimeListeners() {
+  const updateSyncUI = () => {
+    const heroSync = document.querySelector("#view-home .pulse-ring")?.parentElement;
+    if (heroSync) {
+      heroSync.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 pulse-ring"></span><span>Live Cloud Synced · ${allSpaces.length} Spaces · ${allBookings.length} Passes</span>`;
+    }
+  };
+
   // 1. Stream Parking Spaces
   onSnapshot(collection(db, "parking_spaces"), (snapshot) => {
     allSpaces = [];
@@ -222,31 +229,32 @@ function setupRealtimeListeners() {
       allSpaces.push({
         id: id,
         docId: docSnap.id,
-        title: data.title || "Parking Spot",
-        address: data.address || "",
-        area: data.area || "Indiranagar",
-        city: data.city || "Bengaluru",
-        state: data.state || "Karnataka",
-        hourlyPrice: data.hourlyPrice || 40,
-        vehicleCapacity: data.vehicleCapacity || 4,
-        parkingType: data.parkingType || "Covered",
-        rating: data.rating || 4.9,
-        reviewsCount: data.reviewsCount || 12,
-        isCovered: data.isCovered ?? true,
-        hasCctv: data.hasCctv ?? true,
-        hasSecurityGuard: data.hasSecurityGuard ?? false,
-        hasEvCharging: data.hasEvCharging ?? false,
-        has24x7Access: data.has24x7Access ?? true,
-        latitude: data.latitude || 12.9716,
-        longitude: data.longitude || 77.5946,
-        parkingPhoto: data.parkingPhoto || "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=400&q=80",
-        verificationStatus: data.verificationStatus || "Verified",
-        status: data.status || "Active",
-        isOnline: data.isOnline ?? true
+        title: (data.title || data.name || "Parking Spot").trim(),
+        address: (data.address || "").trim(),
+        area: (data.area || "Indiranagar").trim(),
+        city: (data.city || "Bengaluru").trim(),
+        state: (data.state || "").trim(),
+        hourlyPrice: Number(data.hourlyPrice) || 40,
+        vehicleCapacity: Number(data.vehicleCapacity) || 4,
+        parkingType: (data.parkingType || "Covered").trim(),
+        rating: Number(data.rating) || 4.8,
+        reviewsCount: Number(data.reviewsCount) || 12,
+        isCovered: data.isCovered !== false,
+        hasCctv: data.hasCctv !== false,
+        hasSecurityGuard: data.hasSecurityGuard === true,
+        hasEvCharging: data.hasEvCharging === true,
+        has24x7Access: data.has24x7Access !== false,
+        latitude: Number(data.latitude) || 12.9716,
+        longitude: Number(data.longitude) || 77.5946,
+        parkingPhoto: (data.parkingPhoto && data.parkingPhoto.trim().length > 5) ? data.parkingPhoto.trim() : "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=400&q=80",
+        verificationStatus: (data.verificationStatus || "Verified").trim(),
+        status: (data.status || "Active").trim(),
+        isOnline: data.isOnline !== false
       });
     });
 
     console.log(`Real-Time Firestore Sync: ${allSpaces.length} parking spaces loaded.`);
+    updateSyncUI();
     renderHomeFeatured();
     renderExploreSpots();
     renderMapMarkers();
@@ -263,6 +271,7 @@ function setupRealtimeListeners() {
     });
 
     console.log(`Real-Time Firestore Sync: ${allBookings.length} bookings loaded.`);
+    updateSyncUI();
     updateActivePassesBadge();
     renderBookings();
     renderHomeActivePassBanner();
@@ -387,8 +396,13 @@ function getFilteredSpaces() {
         (space.address || "").toLowerCase().includes(q);
       if (!matchesSearch) return false;
     } else if (selectedCityFilter !== "All Cities") {
-      if ((space.city || "").toLowerCase() !== selectedCityFilter.toLowerCase() && 
-          (space.area || "").toLowerCase() !== selectedCityFilter.toLowerCase()) {
+      const cleanSpaceCity = (space.city || "").trim().toLowerCase();
+      const cleanSpaceArea = (space.area || "").trim().toLowerCase();
+      const cleanSelectedCity = selectedCityFilter.trim().toLowerCase();
+      const matchesCity = cleanSpaceCity.includes(cleanSelectedCity) ||
+        cleanSelectedCity.includes(cleanSpaceCity) ||
+        cleanSpaceArea.includes(cleanSelectedCity);
+      if (!matchesCity) {
         return false;
       }
     }
@@ -836,7 +850,7 @@ function renderHomeActivePassBanner() {
   document.getElementById("home-pass-spot-name").textContent = active.parkingTitle || "Reserved Parking Spot";
   document.getElementById("home-pass-vehicle").textContent = `Vehicle: ${active.vehicleRegNumber || 'KA-01-AB-1234'} · Pass #${active.bookingCode}`;
   
-  const spot = allSpaces.find(s => s.id === active.parkingSpaceId);
+  const spot = allSpaces.find(s => String(s.id) === String(active.parkingSpaceId));
   const mapsUrl = getSmartMapsUrl(spot || { title: active.parkingTitle, address: active.parkingAddress, city: active.parkingCity });
   document.getElementById("home-pass-maps-btn").href = mapsUrl;
 
@@ -872,7 +886,7 @@ function renderBookings() {
   }
 
   container.innerHTML = filtered.map(b => {
-    const spot = allSpaces.find(s => s.id === b.parkingSpaceId);
+    const spot = allSpaces.find(s => String(s.id) === String(b.parkingSpaceId));
     const mapsUrl = getSmartMapsUrl(spot || { title: b.parkingTitle, address: b.parkingAddress, city: b.parkingCity });
 
     return `
@@ -928,9 +942,14 @@ function renderBookings() {
                 <i class="fa-solid fa-location-arrow text-blue-400 mr-1"></i> Directions
               </a>
             </div>
-            <button class="w-full sm:w-auto px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition" onclick="window.completeParkingSession('${b.bookingCode}', '${b.parkingTitle}', '${b.parkingSpaceId}')">
-              <i class="fa-solid fa-flag-checkered mr-1.5"></i> Finish Parking
-            </button>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <button class="w-full sm:w-auto px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition" onclick="window.completeParkingSession('${b.bookingCode}', '${b.parkingTitle}', '${b.parkingSpaceId}')">
+                <i class="fa-solid fa-flag-checkered mr-1.5"></i> Finish
+              </button>
+              <button class="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition" onclick="window.cancelParkingBooking('${b.bookingCode}', '${b.parkingTitle}')">
+                <i class="fa-solid fa-xmark mr-1 text-rose-400"></i> Cancel
+              </button>
+            </div>
           ` : `
             <div class="flex items-center gap-2 w-full sm:w-auto">
               <button class="px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold transition" onclick="window.openRatingModal('${b.parkingTitle}', '${b.parkingSpaceId}')">
@@ -955,7 +974,8 @@ window.completeParkingSession = async function(bookingCode, spotTitle, spaceId) 
     const docRef = doc(db, "bookings", bookingCode);
     await updateDoc(docRef, {
       status: "Completed",
-      completedAt: Date.now()
+      completedAt: Date.now(),
+      updatedAt: Date.now()
     });
 
     // Prompt Rating Dialog
@@ -963,6 +983,24 @@ window.completeParkingSession = async function(bookingCode, spotTitle, spaceId) 
   } catch (err) {
     console.error("Error completing session:", err);
     alert("Failed to update status: " + err.message);
+  }
+};
+
+// Cancel Parking Booking Flow
+window.cancelParkingBooking = async function(bookingCode, spotTitle) {
+  if (!confirm(`Are you sure you want to cancel your booking pass for '${spotTitle}'? Your refund will be processed within 24 hours.`)) return;
+
+  try {
+    const docRef = doc(db, "bookings", bookingCode);
+    await updateDoc(docRef, {
+      status: "Cancelled",
+      cancelledAt: Date.now(),
+      updatedAt: Date.now()
+    });
+    alert(`Booking pass #${bookingCode} has been cancelled successfully.`);
+  } catch (err) {
+    console.error("Error cancelling booking pass:", err);
+    alert("Failed to cancel pass: " + err.message);
   }
 };
 
@@ -978,7 +1016,7 @@ function showDigitalPassModal(booking) {
   document.getElementById("pass-time").textContent = `Valid Today · ${booking.durationHours || 2} Hours · ${booking.paymentMethod || 'UPI'}`;
   document.getElementById("pass-reg").textContent = `Vehicle: ${(booking.vehicleRegNumber || 'KA-01-AB-1234').toUpperCase()}`;
 
-  const spot = allSpaces.find(s => s.id === booking.parkingSpaceId);
+  const spot = allSpaces.find(s => String(s.id) === String(booking.parkingSpaceId));
   const mapsUrl = getSmartMapsUrl(spot || { title: booking.parkingTitle, address: booking.parkingAddress, city: booking.parkingCity });
   const passMapsBtn = document.getElementById("pass-maps-btn");
   if (passMapsBtn) passMapsBtn.href = mapsUrl;
@@ -1302,14 +1340,14 @@ function initLocationSelectors() {
 async function publishNewSpace(e) {
   e.preventDefault();
   
-  const title = document.getElementById("space-title").value;
-  const state = document.getElementById("space-state") ? document.getElementById("space-state").value : "Karnataka";
-  const city = document.getElementById("space-city").value;
-  const area = document.getElementById("space-area").value;
-  const pincode = document.getElementById("space-pincode") ? document.getElementById("space-pincode").value : "";
-  const address = document.getElementById("space-address").value;
-  const price = parseFloat(document.getElementById("space-price").value);
-  const capacity = parseInt(document.getElementById("space-capacity").value);
+  const title = document.getElementById("space-title").value.trim();
+  const state = document.getElementById("space-state") ? document.getElementById("space-state").value.trim() : "Karnataka";
+  const city = document.getElementById("space-city").value.trim();
+  const area = document.getElementById("space-area").value.trim();
+  const pincode = document.getElementById("space-pincode") ? document.getElementById("space-pincode").value.trim() : "";
+  const address = document.getElementById("space-address").value.trim();
+  const price = parseFloat(document.getElementById("space-price").value) || 40;
+  const capacity = parseInt(document.getElementById("space-capacity").value) || 2;
   const type = document.getElementById("space-type").value;
   
   const isCovered = document.getElementById("chk-covered").checked;
@@ -1324,12 +1362,18 @@ async function publishNewSpace(e) {
   let defaultLat = 12.9716 + (Math.random() - 0.5) * 0.05;
   let defaultLng = 77.5946 + (Math.random() - 0.5) * 0.05;
 
-  if (titleUpper.includes("SDGI") || titleUpper.includes("SUNDER DEEP")) {
-    defaultLat = 28.6738;
-    defaultLng = 77.4912;
-  } else if (titleUpper.includes("IMS")) {
-    defaultLat = 28.6472;
-    defaultLng = 77.4526;
+  if (titleUpper.includes("GHAZIABAD") || titleUpper.includes("MOHAN NAGAR") || titleUpper.includes("DASNA") || titleUpper.includes("SDGI") || titleUpper.includes("SUNDER DEEP") || titleUpper.includes("ITS") || titleUpper.includes("IMS")) {
+    defaultLat = 28.6692 + (Math.random() - 0.5) * 0.04;
+    defaultLng = 77.4538 + (Math.random() - 0.5) * 0.04;
+  } else if (titleUpper.includes("DELHI") || titleUpper.includes("CP") || titleUpper.includes("CONNAUGHT")) {
+    defaultLat = 28.6139 + (Math.random() - 0.5) * 0.04;
+    defaultLng = 77.2090 + (Math.random() - 0.5) * 0.04;
+  } else if (titleUpper.includes("NOIDA")) {
+    defaultLat = 28.5355 + (Math.random() - 0.5) * 0.04;
+    defaultLng = 77.3910 + (Math.random() - 0.5) * 0.04;
+  } else if (titleUpper.includes("MUMBAI")) {
+    defaultLat = 19.0760 + (Math.random() - 0.5) * 0.04;
+    defaultLng = 72.8777 + (Math.random() - 0.5) * 0.04;
   }
 
   const spaceData = {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "437275182001",
+    "project_id": "parkeasy-20d83",
+    "storage_bucket": "parkeasy-20d83.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437275182001:android:e1f69b3bfe57556d777390",
+        "android_client_info": {
+          "package_name": "com.aistudio.parkspace.vnqwtk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOfp5nHZhRg4csd5O0pGDunTCNDq49jD0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
